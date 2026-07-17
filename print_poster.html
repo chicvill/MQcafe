@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>MQnet 운정 산내점 - A2 인쇄용 안내 포스터</title>
+  <style>
+    @page {
+      size: A2 portrait;
+      margin: 0;
+    }
+    body {
+      font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+      margin: 0;
+      padding: 50px;
+      box-sizing: border-box;
+      background-color: #ffffff;
+      color: #0f172a;
+      width: 420mm;
+      height: 594mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .header h1 {
+      font-size: 54pt;
+      margin: 0;
+      font-weight: 900;
+      color: #10b981;
+      letter-spacing: -2px;
+    }
+    .header p {
+      font-size: 26pt;
+      margin: 15px 0 0 0;
+      color: #475569;
+      font-weight: 600;
+    }
+    .divider {
+      width: 100%;
+      height: 6px;
+      background-color: #10b981;
+      margin: 20px 0;
+      border-radius: 3px;
+    }
+    .section-title {
+      font-size: 28pt;
+      font-weight: 800;
+      align-self: flex-start;
+      margin-left: 10px;
+      color: #0f172a;
+      border-left: 10px solid #10b981;
+      padding-left: 20px;
+      margin-bottom: 20px;
+    }
+    .layout-container {
+      width: 100%;
+      height: 250mm;
+      border: 4px solid #cbd5e1;
+      border-radius: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background-color: #0f172a;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    .layout-container img {
+      max-width: 96%;
+      max-height: 96%;
+      object-fit: contain;
+    }
+    .qr-container {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      padding: 40px;
+      border: 4px dashed #cbd5e1;
+      border-radius: 24px;
+      box-sizing: border-box;
+      background-color: #f8fafc;
+    }
+    .instructions {
+      width: 60%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 30px;
+    }
+    .instruction-step {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .step-number {
+      background-color: #10b981;
+      color: #ffffff;
+      font-size: 26pt;
+      font-weight: 900;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
+    }
+    .step-text {
+      font-size: 22pt;
+      font-weight: 700;
+      color: #334155;
+      line-height: 1.4;
+    }
+    .qr-image-wrapper {
+      width: 120mm;
+      height: 120mm;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 3px solid #e2e8f0;
+      border-radius: 16px;
+      background-color: #0f172a;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .qr-image-wrapper img {
+      width: 92%;
+      height: 92%;
+      object-fit: contain;
+    }
+    .footer {
+      font-size: 16pt;
+      color: #94a3b8;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>MQnet : 운정 산내점</h1>
+    <p>스마트 무인 스터디카페 입실 및 좌석 지정 안내</p>
+  </div>
+  
+  <div class="divider"></div>
+  
+  <div class="section-title">실시간 좌석 배치도 (Seat Layout Map)</div>
+  <div class="layout-container">
+    <img src="frontend/public/layout_map.png" alt="배치도">
+  </div>
+  
+  <div class="qr-container">
+    <div class="instructions">
+      <div class="instruction-step">
+        <div class="step-number">1</div>
+        <div class="step-text">우측의 QR 코드를 스캔하여 전용 웹 페이지에 접속해 주세요. (가입 불필요)</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-number">2</div>
+        <div class="step-text">앱 내에서 <b>좌석 선택 및 이용권 구매, 스마트 출입문 제어, 관리자와의 실시간 채팅</b>이 모두 가능합니다.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-number">3</div>
+        <div class="step-text">💡 <b>빠른 출입 팁:</b> 매번 폰을 켤 필요 없이, 앱에서 소지하신 <b>임의의 실물 카드를 한 번 연동</b>해 두시면 카드 태그만으로 편하게 출입하실 수 있습니다.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-number" style="background-color: #ef4444; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.4);">📢</div>
+        <div class="step-text" style="color: #b91c1c; font-weight: 800;">본 매장은 안전 및 정숙을 위해 고등학교 1학년 이상만 입장 가능합니다.</div>
+      </div>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 25px;">
+      <div class="qr-image-wrapper">
+        <img src="frontend/public/qr_code.png" alt="입장 QR코드">
+      </div>
+      
+      <!-- 무선 카드 결제 단말기 안내 판넬 -->
+      <div style="width: 120mm; padding: 25px; border: 5px solid #10b981; border-radius: 20px; background-color: #ffffff; text-align: center; box-sizing: border-box; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <div style="font-size: 22pt; font-weight: 900; color: #10b981; display: flex; align-items: center; gap: 10px;">
+          💳 무선 카드 단말기 (IC/삼성페이)
+        </div>
+        <div style="font-size: 16pt; font-weight: 700; color: #475569; line-height: 1.4;">
+          스마트폰 결제가 번거로우신 분은<br>
+          <strong style="color: #0f172a;">아래 단말기</strong>에 실물 카드를 꽂아 결제해 주세요.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    본 안내판은 A2 규격(420mm x 594mm) 인쇄에 최적화되어 있습니다. 출입문 앞 눈높이에 부착해 주십시오.
+  </div>
+</body>
+</html>

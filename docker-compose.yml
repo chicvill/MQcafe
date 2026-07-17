@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: mqcafe_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: stcafe_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - mqcafe_pgdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mqcafe_app
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      # DB configuration pointing to the db container
+      - SUPABASE_DB_URL=postgresql://postgres:mysecretpassword@db:5432/stcafe_db
+      - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/stcafe_db
+    env_file:
+      - .env
+
+volumes:
+  mqcafe_pgdata:

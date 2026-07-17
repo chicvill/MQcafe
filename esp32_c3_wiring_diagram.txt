@@ -1,0 +1,86 @@
+# ESP32-C3 Super Mini 배선도 (NFC & 자동문 릴레이)
+
+새로 적용하신 **ESP32-C3 Super Mini** 보드에 맞춘 전체 배선도와 핀 연결 가이드입니다. 
+
+> [!IMPORTANT]
+> - UART 통신(RX/TX)은 **교차 연결(크로스)** 되어야 합니다. ESP32의 RX(6번)는 PN532의 TX에, ESP32의 TX(7번)는 PN532의 RX에 연결합니다.
+> - 자동문 제어 시 **포토커플러(TLP620)나 무전원 릴레이 모듈**을 사용하여 ESP32와 자동문의 전기적 신호를 완전히 분리(절연)하는 것을 권장합니다.
+
+## 1. 핀 연결 요약표
+
+| 부품 | 핀 이름 | ESP32-C3 Super Mini | 연결 설명 |
+| :--- | :--- | :--- | :--- |
+| **PN532 (NFC)** | VCC | **5V 또는 3.3V** | 전원 공급 |
+| | GND | **G (GND)** | 접지 연결 |
+| | RXD | **GPIO 7 (TX)** | 데이터 수신 (ESP32의 송신 핀과 연결) |
+| | TXD | **GPIO 6 (RX)** | 데이터 송신 (ESP32의 수신 핀과 연결) |
+| | RST | **GPIO 5** | NFC 모듈 리셋 |
+| **포토커플러 (TLP620)**| Pin 1 (Anode) | **GPIO 4** | 중간에 330Ω 저항을 달아서 연결 (전류 제한) |
+| | Pin 2 (Cathode) | **G (GND)** | 접지 연결 |
+| | Pin 3 (Emitter) | **자동문 COM** | 자동문 스위치 접점 1 |
+| | Pin 4 (Collector) | **자동문 NO** | 자동문 스위치 접점 2 (도통 시 문열림) |
+
+<br>
+
+## 2. 전체 회로 다이어그램 (구조도)
+
+아래 다이어그램을 참고하여 선을 연결하시면 됩니다.
+
+```mermaid
+graph LR
+    subgraph ESP32 ["ESP32-C3 Super Mini"]
+        direction TB
+        V5[5V / 3.3V 핀]
+        G[GND 핀]
+        RX[GPIO 6 핀 (RX)]
+        TX[GPIO 7 핀 (TX)]
+        RST[GPIO 5 핀]
+        D4[GPIO 4 핀]
+    end
+
+    subgraph PN532 ["PN532 NFC 모듈"]
+        direction TB
+        NVCC[VCC]
+        NGND[GND]
+        NRXD[RXD]
+        NTXD[TXD]
+        NRST[RST]
+    end
+
+    subgraph RELAY ["포토커플러(TLP620) 또는 릴레이"]
+        direction TB
+        P1[입력 + / Pin 1]
+        P2[입력 - / Pin 2]
+        P3[출력 COM / Pin 3]
+        P4[출력 NO / Pin 4]
+        RES[330Ω 저항]
+    end
+
+    subgraph DOOR ["자동문 컨트롤러"]
+        DCOM[COM 접점]
+        DNO[NO (Open) 접점]
+    end
+
+    %% 전원 연결
+    V5 -->|전원| NVCC
+    G -->|접지| NGND
+
+    %% 통신 연결 (크로스)
+    RX <-->|데이터 수신| NTXD
+    TX <-->|데이터 송신| NRXD
+    RST -->|리셋 신호| NRST
+
+    %% 릴레이 제어
+    D4 -->|제어 신호| RES
+    RES --> P1
+    G --> P2
+
+    %% 자동문 연결 (무전원)
+    P3 -->|무전원 연결| DCOM
+    P4 -->|무전원 연결| DNO
+```
+
+### 💡 팁
+* **전원 공급**: ESP32-C3 Super Mini에 USB를 꽂아 전원을 공급할 경우, 보드의 `5V` 핀에서 5V 출력을 끌어다 PN532 모듈의 `VCC`에 공급할 수 있습니다.
+* **PN532 통신 모드**: PN532 보드에 있는 아주 작은 딥스위치 2개가 `0 0` 으로 설정되어 있어야 UART 통신 모드로 작동합니다.
+* 릴레이 모듈을 사용하시는 경우 `GPIO 4` 핀을 릴레이 모듈의 `SIG` (혹은 `IN`) 핀에 바로 연결하시면 됩니다.

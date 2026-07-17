@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQnet 스터디카페 기기 설정 매뉴얼</title>
+    <style>
+        /* A4 프린트용 기본 설정 */
+        @page {
+            size: A4;
+            margin: 15mm 20mm;
+        }
+        @media print {
+            .print-button-container {
+                display: none !important;
+            }
+        }
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #1d4ed8;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #1e3a8a;
+            margin: 0 0 5px 0;
+            font-size: 26px;
+        }
+        .header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .section-title {
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title span {
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .step-list li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .step-list li::before {
+            content: "•";
+            color: #3b82f6;
+            font-weight: bold;
+            font-size: 18px;
+            position: absolute;
+            left: 5px;
+            top: -2px;
+        }
+        .highlight {
+            color: #b91c1c;
+            font-weight: bold;
+        }
+        .blue-highlight {
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+        .role-box {
+            background-color: #fff;
+            border: 1px dashed #cbd5e1;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+        .role-box p {
+            margin: 4px 0;
+            font-size: 13.5px;
+        }
+        .warning {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #991b1b;
+        }
+        /* 그림/아이콘 영역 */
+        .icon-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            padding: 15px 0;
+            border-top: 1px dashed #cbd5e1;
+        }
+        .icon-item {
+            text-align: center;
+            font-size: 12px;
+            color: #475569;
+        }
+        .icon {
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="print-button-container" style="text-align: right; margin-top: 15px; margin-bottom: 10px;">
+            <button onclick="exportToWord()" style="padding: 10px 15px; font-size: 14px; font-weight: bold; background-color: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                📄 워드(Word)로 다운로드
+            </button>
+            <button onclick="window.print()" style="margin-left: 8px; padding: 10px 15px; font-size: 14px; font-weight: bold; background-color: #475569; color: white; border: none; border-radius: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                🖨️ 종이로 바로 인쇄
+            </button>
+            <button onclick="window.close()" style="margin-left: 8px; padding: 10px 15px; font-size: 14px; font-weight: bold; background-color: #ef4444; color: white; border: none; border-radius: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                ❌ 창 닫기
+            </button>
+        </div>
+        <div id="document-content">
+            <div class="header">
+            <h1>출입 통제 기기(NFC & 릴레이) 초기 설정 가이드</h1>
+            <p>IT에 익숙하지 않은 점주님들을 위한 쉽고 빠른 장치 설치 및 와이파이 연결 매뉴얼</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title"><span>1</span> 장치 전원 연결 및 초기화 (리셋)</h2>
+            <ul class="step-list">
+                <li>3개의 장치(외부 리더기, 내부 리더기, 릴레이)를 각각 <strong>DC 5V 아답터에 연결</strong>하여 전원을 켭니다.</li>
+                <li>각 기기의 뚜껑에 있는 작은 바늘 구멍에 핀(클립 등)을 넣어 <strong>내부의 Boot 버튼을 5초 이상 길게 눌러줍니다.</strong></li>
+                <li>기기가 스스로 재부팅되며 초기화가 완료됩니다.</li>
+            </ul>
+            <div class="icon-container">
+                <div class="icon-item"><div class="icon">🔌</div>어댑터 연결</div>
+                <div class="icon-item"><div class="icon">📌</div>5초 꾹 누르기</div>
+                <div class="icon-item"><div class="icon">🔄</div>기기 재부팅 대기</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title"><span>2</span> 스마트폰으로 기기 와이파이 연결하기</h2>
+            <ul class="step-list">
+                <li>스마트폰의 <span class="blue-highlight">Wi-Fi 설정 버튼</span>을 길게 눌러 설정 창으로 들어갑니다.</li>
+                <li>Wi-Fi를 껐다가 다시 켜서 목록을 새로고침 합니다.</li>
+                <li>사용 가능한 Wi-Fi 목록에서 <strong>STCafe-Setup</strong> 이라는 이름의 와이파이를 찾아 터치(선택)합니다.</li>
+                <li>(설정 화면이 자동으로 뜨지 않는다면) 크롬 등 인터넷 주소창에 <strong>192.168.4.1</strong> 을 입력하여 접속합니다.</li>
+                <li>파란색 <strong>[Configure WiFi]</strong> 버튼을 누릅니다.</li>
+                <li>화면 맨 위 목록에서 <span class="highlight">매장에서 실제로 사용 중인 공유기(Wi-Fi)를 선택</span>하고 비밀번호를 입력합니다.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title"><span>3</span> 매장 정보 및 장치 역할 부여 (중요)</h2>
+            <ul class="step-list">
+                <li>비밀번호 입력 칸 바로 아래에 <strong>본사에서 지정해준 매장 ID</strong>를 정확히 입력합니다. (예: ST001)</li>
+                <li>그 아래 <strong>역할(reader_action)</strong> 칸에는 기기가 설치될 위치에 맞춰 다음 중 하나를 영문 소문자로 입력합니다.</li>
+            </ul>
+            
+            <div class="role-box">
+                <p>📇 <strong>entry</strong> : 밖에서 안으로 들어올 때 찍는 출입문 외부 NFC 리더기</p>
+                <p>🚪 <strong>exit</strong> : 안에서 밖으로 나갈 때 찍는 출입문 내부 NFC 리더기</p>
+                <p>⚡ <strong>relay</strong> : 자동문에 직접 연결되어 문을 열어주는 제어기(릴레이)</p>
+            </div>
+
+            <ul class="step-list">
+                <li>정보를 모두 입력했다면 맨 밑의 <strong>[Save]</strong> 버튼을 눌러 저장합니다.</li>
+                <li>저장이 완료되면 스마트폰의 [이전] 화면으로 돌아가, 스마트폰의 와이파이를 <span class="blue-highlight">다시 원래 매장 와이파이로</span> 연결해 줍니다.</li>
+            </ul>
+            <div class="warning">
+                ⚠️ 주의: 위 <strong>[2번 ~ 3번]</strong> 과정을 <strong>3개의 기기(entry, exit, relay) 모두 동일하게 반복</strong>하여 설정해 주셔야 완벽하게 세팅이 끝납니다!
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title"><span>4</span> 실제 출입문(NFC 카드) 연동 테스트</h2>
+            <ul class="step-list">
+                <li>스마트폰 카메라로 매장 앞에 비치된 <strong>고객용 QR 코드</strong>를 스캔하여 웹사이트에 접속합니다.</li>
+                <li>고객 입장이 되어 이용권(시간권 등)을 1개 구매하고 결제를 완료합니다.</li>
+                <li>결제 완료 후 나오는 이용 화면에서 <strong>[출입용 카드 간편 연동하기]</strong> 버튼을 누른 뒤 [연동 시작]을 누릅니다.</li>
+                <li>60초 이내에 출입증으로 사용할 <strong>임의의 플라스틱 카드(교통카드 등)</strong>를 외부 출입문 리더기(entry)에 태그합니다.</li>
+                <li>스마트폰에 '등록 완료' 화면이 뜨면 성공입니다!</li>
+                <li>이제 방금 그 카드를 다시 NFC 리더기에 대면, <span class="highlight">자동문(릴레이)이 찰칵 하고 열리는지 확인</span>하시면 모든 설치가 끝납니다.</li>
+            </ul>
+            <div class="icon-container" style="border-top:none; padding-bottom:0;">
+                <div class="icon-item"><div class="icon">📱</div>QR 접속 및 결제</div>
+                <div class="icon-item"><div class="icon">💳</div>카드 연동 모드 실행</div>
+                <div class="icon-item"><div class="icon">✅</div>태그 후 문 열림 확인</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function exportToWord() {
+            var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>기기 설정 매뉴얼</title></head><body>";
+            var footer = "</body></html>";
+            
+            // Get content and remove print buttons temporarily
+            var contentDiv = document.getElementById("document-content").innerHTML;
+            var sourceHTML = header + contentDiv + footer;
+            
+            var source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            var fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = source;
+            fileDownload.download = 'MQnet_기기_설정_매뉴얼.doc';
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+        }
+    </script>
+</body>
+</html>
