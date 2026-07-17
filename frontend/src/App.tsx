@@ -233,6 +233,10 @@ function App() {
       pendingPayRef.current = { requestId, onApprove: processCheckIn };
       setTimeout(() => {
         if (pendingPayRef.current?.requestId === requestId) {
+          if (mqttClientRef.current) {
+            const cancelReq = { action: 'pay_cancel', storeId, requestId };
+            mqttClientRef.current.publish(`terminal/${storeId}/pay/cancel`, JSON.stringify(cancelReq), { qos: 1 });
+          }
           pendingPayRef.current = null;
           alert('단말기 결제 응답 시간 초과. 다시 시도해 주세요.');
           setPayAppLoading(false);
