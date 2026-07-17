@@ -1,35 +1,33 @@
-import { useEffect, useState, useRef } from 'react';
-import { Box, Typography, Button, IconButton } from '@mui/material';
+import React, { useEffect, useState, useRef, Suspense } from 'react';
+import { Box, Typography, Button, IconButton, CircularProgress } from '@mui/material';
 import { QrCodeScanner, AdminPanelSettings, Menu } from '@mui/icons-material';
-import mqtt from 'mqtt';
 
 import { useAppContext } from './contexts/AppContext';
 import { useUserContext } from './contexts/UserContext';
 import { useChatContext } from './contexts/ChatContext';
+import { useAppSync } from './hooks/useAppSync';
 
-import CustomerMain from './components/customer/CustomerMain';
-import AdminMain from './components/admin/AdminMain';
-import OwnerMain from './components/owner/OwnerMain';
+// Lazy loading main views
+const CustomerMain = React.lazy(() => import('./components/customer/CustomerMain'));
+const AdminMain = React.lazy(() => import('./components/admin/AdminMain'));
+const OwnerMain = React.lazy(() => import('./components/owner/OwnerMain'));
+
 import SeatMapModal from './components/customer/SeatMapModal';
 import PaymentModal from './components/customer/PaymentModal';
 import StoreSelector from './components/customer/StoreSelector';
 import QRPoster from './pages/QRPoster';
 
-import { API_URL, WS_URL, MQTT_BROKER, MQTT_OPTIONS, playNotificationSound } from './utils/constants';
+import { API_URL } from './utils/constants';
 
 function App() {
-  const { mode, setMode, stores, setStores, storeId, ownerId, setSeats, setOpenPayAppModal, payAppDetails, setPayAppLoading, setOpenDrawer, setOwnerDrawerOpen, setCustomerDrawerOpen, setAdminDrawerOpen, setIsExtensionMode, terminalConnected, setTerminalConnected, setPayStep, setCurrentRequestId, setStoreId } = useAppContext();
+  const { mode, setMode, stores, setStores, storeId, ownerId, setSeats, setOpenPayAppModal, payAppDetails, setPayAppLoading, setOpenDrawer, setOwnerDrawerOpen, setCustomerDrawerOpen, setAdminDrawerOpen, setIsExtensionMode, terminalConnected, setPayStep, setCurrentRequestId, setStoreId } = useAppContext();
   const { activeSession, setActiveSession } = useUserContext();
-  const { setChatMessages, setAdminWs, selectedAdminSessionId, setReadMessageCounts } = useChatContext();
+  const { setChatMessages } = useChatContext();
   
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleString('ko-KR'));
-  const [ws, setWs] = useState<WebSocket | null>(null);
-  const mqttClientRef = useRef<any>(null);
   const pendingPayRef = useRef<{ requestId: string; onApprove: () => void } | null>(null);
-  const terminalHeartbeatRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const activeSessionRef = useRef(activeSession);
 
-  // Sync activeSession to ref
+  const activeSessionRef = useRef(activeSession);
   useEffect(() => {
     activeSessionRef.current = activeSession;
   }, [activeSession]);
@@ -41,6 +39,9 @@ function App() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Sync Hooks (MQTT, WebSockets)
+  const { ws, mqttClientRef } = useAppSync(fetchSeats, pendingPayRef);
 
   // URL 동기화 (새로고침 없이 주소창 업데이트)
   useEffect(() => {
@@ -60,7 +61,7 @@ function App() {
   }, [mode, setPayStep, setCurrentRequestId]);
 
   // 매장 목록 조회 (Prototype: 항상 모든 매장을 조회하여 테스트 가능하도록 함)
-  const fetchStores = async () => {
+  async function fetchStores() {
     try {
       const url = (mode === 'owner' && ownerId) ? `${API_URL}/stores?owner_id=${ownerId}` : `${API_URL}/stores`;
       const res = await fetch(url);
@@ -84,14 +85,14 @@ function App() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }
 
   useEffect(() => {
     fetchStores();
   }, [ownerId, mode]);
 
   // 좌석 상태 조회
-  const fetchSeats = async () => {
+  async function fetchSeats() {
     if (!storeId) return;
     try {
       const res = await fetch(`${API_URL}/seats?store_id=${storeId}`);
@@ -102,177 +103,14 @@ function App() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }
 
   useEffect(() => {
     fetchSeats();
   }, [storeId]);
 
-  // MQTT 연결
-  useEffect(() => {
-    const client = mqtt.connect(MQTT_BROKER, MQTT_OPTIONS);
-    mqttClientRef.current = client;
-
-    client.on('connect', () => {
-      client.subscribe(`stcafe/${storeId}/update`);
-      client.subscribe(`terminal/${storeId}/heartbeat`);
-      client.subscribe(`terminal/${storeId}/pay/result`);
-    });
-
-    client.on('message', (topic, message) => {
-      try {
-        const payload = JSON.parse(message.toString());
-
-        if (topic === `stcafe/${storeId}/update`) {
-          if (payload.type === 'CHECKIN' || payload.type === 'CHECKOUT' || payload.type === 'UPDATE' || payload.action === 'seat_updated' || payload.action === 'init') {
-            fetchSeats();
-          }
-          if (payload.type === 'nfc_scan_result' && payload.session_id === activeSessionRef.current?.session_id) {
-            window.dispatchEvent(new CustomEvent('nfc_scan_event', { detail: payload.data }));
-          }
-          if ((payload.type === 'OUTING_TOGGLE' || payload.type === 'CHECKIN' || payload.type === 'CHECKOUT') && payload.session_id === activeSessionRef.current?.session_id) {
-            setActiveSession((prev: any) => prev ? { ...prev, status: payload.status } : prev);
-          }
-        }
-
-        // 단말기 하트비트 — 연결 상태 유지
-        if (topic === `terminal/${storeId}/heartbeat`) {
-          setTerminalConnected(true);
-          if (terminalHeartbeatRef.current) clearTimeout(terminalHeartbeatRef.current);
-          // 60초 내 하트비트 없으면 오프라인으로 전환
-          terminalHeartbeatRef.current = setTimeout(() => setTerminalConnected(false), 60000);
-        }
-
-        // 단말기 결제 결과 수신
-        if (topic === `terminal/${storeId}/pay/result`) {
-          if (
-            payload.action === 'pay_result' &&
-            payload.status === 'approved' &&
-            pendingPayRef.current &&
-            pendingPayRef.current.requestId === payload.requestId
-          ) {
-            pendingPayRef.current.onApprove();
-            pendingPayRef.current = null;
-          } else if (payload.action === 'pay_result' && payload.status !== 'approved') {
-            alert(`결제 거절: ${payload.reason || '단말기 결제가 거절되었습니다.'}`);
-            setPayAppLoading(false);
-            setPayStep('select');
-          }
-        }
-      } catch (e) {
-        console.error('MQTT message parse error:', e);
-      }
-    });
-
-    return () => {
-      client.end();
-      if (terminalHeartbeatRef.current) clearTimeout(terminalHeartbeatRef.current);
-    };
-  }, [storeId]);
-
-  // WebSocket 통신 (고객용)
-  useEffect(() => {
-    if (!activeSession?.session_id) return;
-    const socket = new WebSocket(`${WS_URL}/ws/customer/${activeSession.session_id}`);
-    socket.onopen = () => {
-      setWs(socket);
-      setChatMessages(activeSession.metadata?.messages || []);
-    };
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'admin_message') {
-          setChatMessages((prev: any[]) => [...prev, data.message]);
-          playNotificationSound(); // 고객용 신규 메시지 알림음
-        } else if (data.type === 'nfc_scan_result') {
-          window.dispatchEvent(new CustomEvent('nfc_scan_event', { detail: data.data }));
-        }
-      } catch (err) { console.error(err); }
-    };
-    socket.onclose = () => setWs(null);
-    return () => { socket.close(); };
-  }, [activeSession?.session_id, setChatMessages]);
-
-  // WebSocket 통신 (관리자/점주용)
-  const selectedAdminSessionIdRef = useRef(selectedAdminSessionId);
-  useEffect(() => {
-    selectedAdminSessionIdRef.current = selectedAdminSessionId;
-  }, [selectedAdminSessionId]);
-
-  useEffect(() => {
-    if (mode !== 'owner') return;
-    const socket = new WebSocket(`${WS_URL}/ws/admin`);
-    socket.onopen = () => {
-      setAdminWs(socket);
-    };
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'customer_message') {
-          const { session_id, message } = data;
-          setSeats((prevSeats: any[]) => {
-            return prevSeats.map(seat => {
-              if (seat.session_id === session_id) {
-                const meta = seat.metadata || {};
-                const currentMsgs = meta.messages || [];
-                // 중복 추가 방지
-                const exists = currentMsgs.some((m: any) => m.timestamp === message.timestamp && m.text === message.text);
-                if (exists) return seat;
-                return {
-                  ...seat,
-                  metadata: {
-                    ...meta,
-                    messages: [...currentMsgs, message]
-                  }
-                };
-              }
-              return seat;
-            });
-          });
-          playNotificationSound(); // 점주용 신규 메시지 알림음
-
-          // 읽음 개수 관리: 현재 선택한 세션 대화방이 아니면 읽음 카운트를 올리지 않음 (Unread 뱃지 표시 유도)
-          const activeAdminSessId = selectedAdminSessionIdRef.current;
-          if (session_id === activeAdminSessId) {
-            setReadMessageCounts((prev: any) => {
-              const currentCount = prev[session_id] || 0;
-              return { ...prev, [session_id]: currentCount + 1 };
-            });
-          }
-        } else if (data.type === 'admin_reply') {
-          const { session_id, message } = data;
-          setSeats((prevSeats: any[]) => {
-            return prevSeats.map(seat => {
-              if (seat.session_id === session_id) {
-                const meta = seat.metadata || {};
-                const currentMsgs = meta.messages || [];
-                const exists = currentMsgs.some((m: any) => m.timestamp === message.timestamp && m.text === message.text);
-                if (exists) return seat;
-                return {
-                  ...seat,
-                  metadata: {
-                    ...meta,
-                    messages: [...currentMsgs, message]
-                  }
-                };
-              }
-              return seat;
-            });
-          });
-          setReadMessageCounts((prev: any) => {
-            const currentCount = prev[session_id] || 0;
-            return { ...prev, [session_id]: currentCount + 1 };
-          });
-        }
-      } catch (err) {
-        console.error('Admin WS parse error:', err);
-      }
-    };
-    socket.onclose = () => setAdminWs(null);
-    return () => {
-      socket.close();
-    };
-  }, [mode, setAdminWs, setSeats, setReadMessageCounts]);
+  // Sync Hooks (MQTT, WebSockets)
+  useAppSync(fetchSeats, pendingPayRef);
 
   // 결제 승인 후 서버 체크인 처리 (공통)
   const processCheckIn = async () => {
@@ -503,20 +341,22 @@ function App() {
         </Box>
       </Box>
 
-      {mode === 'customer' && (
-        <CustomerMain
-          fetchSeats={fetchSeats}
-          handleSendCustomerMessage={handleSendCustomerMessage}
-        />
-      )}
+      <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', p: 10 }}><CircularProgress /></Box>}>
+        {mode === 'customer' && (
+          <CustomerMain
+            fetchSeats={fetchSeats}
+            handleSendCustomerMessage={handleSendCustomerMessage}
+          />
+        )}
 
-      {mode === 'admin' && (
-        <AdminMain />
-      )}
+        {mode === 'admin' && (
+          <AdminMain />
+        )}
 
-      {mode === 'owner' && (
-        <OwnerMain fetchStores={fetchStores} />
-      )}
+        {mode === 'owner' && (
+          <OwnerMain fetchStores={fetchStores} />
+        )}
+      </Suspense>
 
 
       <SeatMapModal fetchSeats={fetchSeats} />
