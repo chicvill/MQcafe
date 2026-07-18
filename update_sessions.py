@@ -14,7 +14,7 @@ def update_sessions():
     
     try:
         # Fetch current active sessions
-        cur.execute("SELECT session_id, store_id, metadata FROM stcafe.table_sessions WHERE status = 'active'")
+        cur.execute("SELECT session_id, store_id, metadata FROM table_sessions WHERE status = 'active'")
         sessions = cur.fetchall()
         
         # Map store to the new table and name
@@ -41,7 +41,7 @@ def update_sessions():
                 meta["duration_minutes"] = 1440  # 1 day
                 
                 cur.execute("""
-                    UPDATE stcafe.table_sessions
+                    UPDATE table_sessions
                     SET table_id = %s, metadata = %s
                     WHERE session_id = %s
                 """, (new_table, json.dumps(meta), session_id))

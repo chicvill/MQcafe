@@ -26,7 +26,7 @@ if owner:
         print("Resetting password to 1212...")
         conn = get_db_conn()
         cur = conn.cursor()
-        cur.execute("UPDATE stcafe.owners SET password_hash = %s WHERE phone = %s", (test_hash, phone))
+        cur.execute("UPDATE owners SET password_hash = %s WHERE phone = %s", (test_hash, phone))
         conn.commit()
         conn.close()
         print("Password reset successfully!")

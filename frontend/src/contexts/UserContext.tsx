@@ -73,8 +73,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     periodPerDay: 1500
   };
 
-  const [userName, setUserName] = useState(() => localStorage.getItem('stcafe_user_name') || '');
-  const [phoneNumber, setPhoneNumber] = useState(() => localStorage.getItem('stcafe_phone_number') || '');
+  const [userName, setUserName] = useState(() => localStorage.getItem('mqcafe_user_name') || '');
+  const [phoneNumber, setPhoneNumber] = useState(() => localStorage.getItem('mqcafe_phone_number') || '');
   const [ticketCategory, setTicketCategory] = useState<'time' | 'day' | 'period'>('time');
   const [selectedTimeHours, setSelectedTimeHours] = useState<number>(2);
   const [selectedDayDays, setSelectedDayDays] = useState<number>(1);

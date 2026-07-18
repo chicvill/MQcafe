@@ -14,7 +14,7 @@ gemini_client: genai.Client | None = None
 if gemini_key and not gemini_key.startswith("MY_"):
     try:
         gemini_client = genai.Client(api_key=gemini_key)
-        print("[OK] Gemini AI Engine configured successfully for STcafe.")
+        print("[OK] Gemini AI Engine configured successfully for MQcafe.")
     except Exception as e:
         print(f"[WARN] Failed to configure Gemini: {e}")
 else:

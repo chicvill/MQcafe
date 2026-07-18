@@ -20,11 +20,11 @@ const char *mqtt_password = "M!nkim5053hivemq";
 Preferences preferences;
 
 // 기본값 세팅 (스마트폰으로 언제든 변경 가능)
-char stcafe_id[40] = "ST001";
+char mqcafe_id[40] = "ST001";
 char reader_action[10] = "entry";
 String macAddr = "";
 String topic_open = "";
-const char *topic_scan = "stcafe/nfc/scan";
+const char *topic_scan = "mqcafe/nfc/scan";
 
 bool shouldSaveConfig = false;
 void saveConfigCallback() {
@@ -101,7 +101,7 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length) {
 void reconnect() {
   while (!client.connected()) {
     Serial.print("\n[MQTT] 연결 시도 중...");
-    String clientId = "STCafe-Door-" + macAddr;
+    String clientId = "MQCafe-Door-" + macAddr;
 
     if (client.connect(clientId.c_str(), mqtt_user, mqtt_password)) {
       Serial.println("연결 성공!");
@@ -127,19 +127,19 @@ void setup() {
   pinMode(RESET_BTN_PIN, INPUT_PULLUP);
 
   // 1. 저장된 설정 불러오기
-  preferences.begin("stcafe", false);
-  String saved_id = preferences.getString("stcafe_id", "ST001");
+  preferences.begin("mqcafe", false);
+  String saved_id = preferences.getString("mqcafe_id", "ST001");
   String saved_action = preferences.getString("reader_action", "entry");
-  saved_id.toCharArray(stcafe_id, 40);
+  saved_id.toCharArray(mqcafe_id, 40);
   saved_action.toCharArray(reader_action, 10);
-  Serial.println("\n[INIT] 로드된 설정 - 매장 ID: " + String(stcafe_id) +
+  Serial.println("\n[INIT] 로드된 설정 - 매장 ID: " + String(mqcafe_id) +
                  ", 단말기 역할: " + String(reader_action));
 
   /*
-    [ STcafe WiFi 설정 (WiFiManager) 방법 요약 ]
+    [ MQcafe WiFi 설정 (WiFiManager) 방법 요약 ]
     1. 기기에 전원을 연결합니다.
     2. 이전에 저장된 WiFi 정보가 없거나 연결에 실패하면, 기기가 스스로 AP(공유기)가 됩니다.
-    3. 스마트폰이나 PC의 WiFi 설정에서 "STCafe-Setup" 이라는 네트워크를 찾아 연결합니다.
+    3. 스마트폰이나 PC의 WiFi 설정에서 "MQCafe-Setup" 이라는 네트워크를 찾아 연결합니다.
     4. 연결 후 자동으로 설정 웹페이지(Captive Portal)가 뜹니다.
        (자동으로 뜨지 않을 경우 브라우저를 열고 192.168.4.1 로 접속합니다)
     5. 'Configure WiFi'를 누르고, 매장의 실제 사용 중인 공유기(WiFi) 이름과 비밀번호를 입력합니다.
@@ -150,19 +150,19 @@ void setup() {
   WiFiManager wm;
   wm.setSaveConfigCallback(saveConfigCallback);
 
-  WiFiManagerParameter custom_stcafe_id("stcafe_id", "매장 ID (예: ST001)",
-                                        stcafe_id, 40);
+  WiFiManagerParameter custom_mqcafe_id("mqcafe_id", "매장 ID (예: ST001)",
+                                        mqcafe_id, 40);
   WiFiManagerParameter custom_reader_action(
       "reader_action", "역할 (entry, exit 또는 relay 입력)", reader_action, 10);
 
-  wm.addParameter(&custom_stcafe_id);
+  wm.addParameter(&custom_mqcafe_id);
   wm.addParameter(&custom_reader_action);
 
-  // 와이파이 연결 시도 (실패 시 "STCafe-Setup" AP 생성)
+  // 와이파이 연결 시도 (실패 시 "MQCafe-Setup" AP 생성)
   // wm.resetSettings(); // 공유기 설정을 초기화하고 싶을 때 주석 해제하여 한 번
   // 실행하세요
 
-  if (!wm.autoConnect("STCafe-Setup")) {
+  if (!wm.autoConnect("MQCafe-Setup")) {
     Serial.println("[WIFI] 설정 시간 초과. 기기를 재부팅합니다.");
     delay(3000);
     ESP.restart();
@@ -172,10 +172,10 @@ void setup() {
 
   // 3. 설정이 변경되었다면 저장
   if (shouldSaveConfig) {
-    strcpy(stcafe_id, custom_stcafe_id.getValue());
+    strcpy(mqcafe_id, custom_mqcafe_id.getValue());
     strcpy(reader_action, custom_reader_action.getValue());
 
-    preferences.putString("stcafe_id", String(stcafe_id));
+    preferences.putString("mqcafe_id", String(mqcafe_id));
     preferences.putString("reader_action", String(reader_action));
     Serial.println("[INIT] 새 설정이 저장되었습니다.");
   }
@@ -184,7 +184,7 @@ void setup() {
   // 4. 기기 고유 MAC 주소 추출 및 토픽 생성
   macAddr = WiFi.macAddress();
   macAddr.replace(":", "");
-  topic_open = "stcafe/" + String(stcafe_id) + "/door/control";
+  topic_open = "mqcafe/" + String(mqcafe_id) + "/door/control";
   Serial.println("[INIT] 내 기기 MAC 주소: " + macAddr);
 
   // 5. MQTT 초기화
@@ -224,7 +224,7 @@ void loop() {
       WiFiManager wm;
       wm.resetSettings(); // 저장된 와이파이 정보 삭제
       delay(1000);
-      ESP.restart();      // 기기 재부팅 -> STCafe-Setup 핫스팟 생성
+      ESP.restart();      // 기기 재부팅 -> MQCafe-Setup 핫스팟 생성
     }
   } else {
     btnPressTime = 0;
@@ -238,7 +238,7 @@ void loop() {
   static unsigned long lastHeartbeat = 0;
   if (millis() - lastHeartbeat > 10000) {
     lastHeartbeat = millis();
-    Serial.println("[SYS] 정상 동작 중... (매장: " + String(stcafe_id) +
+    Serial.println("[SYS] 정상 동작 중... (매장: " + String(mqcafe_id) +
                    " / 모드: " + String(reader_action) + ")");
   }
 
@@ -274,7 +274,7 @@ void loop() {
 
         // MAC 주소와 설정된 매장 ID를 포함하여 전송 (완전 범용)
         String payload = "{\"device_id\":\"" + macAddr + "\", \"store_id\":\"" +
-                         String(stcafe_id) + "\", \"action\":\"" +
+                         String(mqcafe_id) + "\", \"action\":\"" +
                          String(reader_action) + "\", \"uid\":\"" + uidStr +
                          "\"}";
         client.publish(topic_scan, payload.c_str());

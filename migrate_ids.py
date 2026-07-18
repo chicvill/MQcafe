@@ -21,9 +21,9 @@ def migrate_ids():
             old_id = store['id']
             temp_id = f"TEMP_{i+1:03d}"
             
-            cur.execute("UPDATE stcafe.stores SET id = %s WHERE id = %s", (temp_id, old_id))
-            cur.execute("UPDATE stcafe.table_sessions SET store_id = %s WHERE store_id = %s", (temp_id, old_id))
-            cur.execute("UPDATE stcafe.knowledge_bundles SET store_id = %s WHERE store_id = %s", (temp_id, old_id))
+            cur.execute("UPDATE stores SET id = %s WHERE id = %s", (temp_id, old_id))
+            cur.execute("UPDATE table_sessions SET store_id = %s WHERE store_id = %s", (temp_id, old_id))
+            cur.execute("UPDATE knowledge_bundles SET store_id = %s WHERE store_id = %s", (temp_id, old_id))
             
             store['temp_id'] = temp_id
 
@@ -33,9 +33,9 @@ def migrate_ids():
             final_id = f"ST{i+1:03d}"
             name = store['name']
             
-            cur.execute("UPDATE stcafe.stores SET id = %s WHERE id = %s", (final_id, temp_id))
-            cur.execute("UPDATE stcafe.table_sessions SET store_id = %s WHERE store_id = %s", (final_id, temp_id))
-            cur.execute("UPDATE stcafe.knowledge_bundles SET store_id = %s WHERE store_id = %s", (final_id, temp_id))
+            cur.execute("UPDATE stores SET id = %s WHERE id = %s", (final_id, temp_id))
+            cur.execute("UPDATE table_sessions SET store_id = %s WHERE store_id = %s", (final_id, temp_id))
+            cur.execute("UPDATE knowledge_bundles SET store_id = %s WHERE store_id = %s", (final_id, temp_id))
             
             print(f"Migrated [{name}]: {store['id']} -> {final_id}")
             

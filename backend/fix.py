@@ -40,7 +40,7 @@ def admin_clear_chat(session_id: str, background_tasks: BackgroundTasks):
     
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess.get('store_id', 'ST001')}/update",
+        topic=f"mqcafe/{sess.get('store_id', 'ST001')}/update",
         payload={
             "type": "UPDATE",
         },
@@ -52,7 +52,7 @@ def remote_door_open(req: DoorControlRequest, background_tasks: BackgroundTasks)
     \"\"\"
     점주 대시보드에서 '원격 출입문 개방' 버튼 클릭 시 호출
     \"\"\"
-    topic = f"stcafe/{req.store_id}/door/control"
+    topic = f"mqcafe/{req.store_id}/door/control"
     payload = {"command": "OPEN", "session_id": "remote_admin"}
     print(f"!!! DEBUG ADMIN DOOR OPEN !!! -> topic: {topic}, payload: {payload}")
     if background_tasks:

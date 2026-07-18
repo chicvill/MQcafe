@@ -136,17 +136,17 @@ def get_cloud_db_conn():
         return None
 
 def init_db():
-    """stcafe 스키마 생성 및 전용 테이블 구축"""
+    """mqcafe 스키마 생성 및 전용 테이블 구축"""
     conn = get_db_conn()
     try:
         cur = conn.cursor()
         
         # 0. 스터디 카페 전용 스키마 생성
-        cur.execute("CREATE SCHEMA IF NOT EXISTS stcafe;")
+        cur.execute("CREATE SCHEMA IF NOT EXISTS mqcafe;")
         
         # 1. 매장 및 점주 테이블 생성
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS stcafe.owners (
+            CREATE TABLE IF NOT EXISTS owners (
                 id TEXT PRIMARY KEY,
                 phone TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
@@ -157,7 +157,7 @@ def init_db():
 
         # 1.5 Render 및 DB Keep-Alive 유휴방지 테이블 생성
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS stcafe.keep_alive (
+            CREATE TABLE IF NOT EXISTS mqcafe.keep_alive (
                 id SERIAL PRIMARY KEY,
                 val INTEGER DEFAULT 1,
                 created_at TIMESTAMP DEFAULT NOW()
@@ -165,7 +165,7 @@ def init_db():
         """)
 
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS stcafe.stores (
+            CREATE TABLE IF NOT EXISTS stores (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
                 ceo_name TEXT NOT NULL,
@@ -179,29 +179,29 @@ def init_db():
         
         # 기존 테이블이 있을 수 있으므로 컬럼 추가
         try:
-            cur.execute("ALTER TABLE stcafe.stores ADD COLUMN metadata JSONB DEFAULT '{}';")
+            cur.execute("ALTER TABLE stores ADD COLUMN metadata JSONB DEFAULT '{}';")
             conn.commit()
         except Exception:
             conn.rollback()
             cur = conn.cursor()
             
         try:
-            cur.execute("ALTER TABLE stcafe.owners ADD COLUMN metadata JSONB DEFAULT '{}';")
+            cur.execute("ALTER TABLE owners ADD COLUMN metadata JSONB DEFAULT '{}';")
             conn.commit()
         except Exception:
             conn.rollback()
             cur = conn.cursor()
             
         try:
-            cur.execute("ALTER TABLE stcafe.stores ADD COLUMN owner_id TEXT;")
+            cur.execute("ALTER TABLE stores ADD COLUMN owner_id TEXT;")
             conn.commit()
         except Exception:
             conn.rollback()
             cur = conn.cursor()
         
-        # 2. 세션 대장 테이블 (stcafe.table_sessions)
+        # 2. 세션 대장 테이블 (table_sessions)
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS stcafe.table_sessions (
+            CREATE TABLE IF NOT EXISTS table_sessions (
                 session_id TEXT PRIMARY KEY,
                 store_id TEXT NOT NULL,
                 table_id TEXT NOT NULL,
@@ -213,9 +213,9 @@ def init_db():
             )
         """)
         
-        # 3. AI 지식 창고 및 매출 요약 테이블 (stcafe.knowledge_bundles)
+        # 3. AI 지식 창고 및 매출 요약 테이블 (knowledge_bundles)
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS stcafe.knowledge_bundles (
+            CREATE TABLE IF NOT EXISTS knowledge_bundles (
                 id TEXT PRIMARY KEY,
                 type TEXT NOT NULL, -- e.g., 'StudyCafeStats'
                 store_id TEXT NOT NULL,
@@ -225,9 +225,9 @@ def init_db():
             )
         """)
         
-        # 4. NFC 등록 카드 테이블 (stcafe.nfc_cards)
+        # 4. NFC 등록 카드 테이블 (nfc_cards)
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS stcafe.nfc_cards (
+            CREATE TABLE IF NOT EXISTS nfc_cards (
                 uid TEXT PRIMARY KEY,
                 user_name TEXT NOT NULL,
                 phone_number TEXT NOT NULL,
@@ -236,8 +236,8 @@ def init_db():
         """)
 
         # 5. 인덱스 생성
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_stcafe_sessions_store_table ON stcafe.table_sessions(store_id, table_id);")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_stcafe_knowledge_store ON stcafe.knowledge_bundles(store_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_mqcafe_sessions_store_table ON table_sessions(store_id, table_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_mqcafe_knowledge_store ON knowledge_bundles(store_id);")
         
         # 6. 테스트용 기본 매장 데이터 삽입 (없는 경우에만)
         default_metadata = {
@@ -265,35 +265,35 @@ def init_db():
             }
         }
         
-        cur.execute("SELECT COUNT(*) FROM stcafe.owners WHERE id = 'default-owner';")
+        cur.execute("SELECT COUNT(*) FROM owners WHERE id = 'default-owner';")
         if cur.fetchone()[0] == 0:
             cur.execute("""
-                INSERT INTO stcafe.owners (id, phone, password_hash)
+                INSERT INTO owners (id, phone, password_hash)
                 VALUES (%s, %s, %s);
             """, ('default-owner', '01012345678', 'dummy_hash'))
 
-        cur.execute("SELECT COUNT(*) FROM stcafe.stores WHERE id = 'ST001';")
+        cur.execute("SELECT COUNT(*) FROM stores WHERE id = 'ST001';")
         if cur.fetchone()[0] == 0:
             cur.execute("""
-                INSERT INTO stcafe.stores (id, name, ceo_name, metadata, owner_id)
+                INSERT INTO stores (id, name, ceo_name, metadata, owner_id)
                 VALUES (%s, %s, %s, %s::jsonb, %s);
             """, ('ST001', 'MQcafe 합정 안내점', '민병철', json.dumps(default_metadata), 'default-owner'))
             
-        cur.execute("SELECT COUNT(*) FROM stcafe.stores WHERE id = 'stcafe-store-2';")
+        cur.execute("SELECT COUNT(*) FROM stores WHERE id = 'mqcafe-store-2';")
         if cur.fetchone()[0] == 0:
             cur.execute("""
-                INSERT INTO stcafe.stores (id, name, ceo_name, metadata, owner_id)
+                INSERT INTO stores (id, name, ceo_name, metadata, owner_id)
                 VALUES (%s, %s, %s, %s::jsonb, %s);
-            """, ('stcafe-store-2', 'MQcafe 일산 주엽점', '홍길동', json.dumps(default_metadata), 'default-owner'))
+            """, ('mqcafe-store-2', 'MQcafe 일산 주엽점', '홍길동', json.dumps(default_metadata), 'default-owner'))
             
         # 기존에 생성된 매장들에 대한 마이그레이션
-        cur.execute("UPDATE stcafe.stores SET metadata = %s::jsonb WHERE metadata = '{}'::jsonb OR metadata IS NULL;", (json.dumps(default_metadata),))
-        cur.execute("UPDATE stcafe.stores SET owner_id = 'default-owner' WHERE owner_id IS NULL;")
+        cur.execute("UPDATE stores SET metadata = %s::jsonb WHERE metadata = '{}'::jsonb OR metadata IS NULL;", (json.dumps(default_metadata),))
+        cur.execute("UPDATE stores SET owner_id = 'default-owner' WHERE owner_id IS NULL;")
         
         conn.commit()
         cur.close()
         conn.close()
-        print("[OK] stcafe schema & tables initialized successfully.")
+        print("[OK] mqcafe schema & tables initialized successfully.")
     except Exception as e:
         conn.rollback()
         print(f"[ERR] DB Init Error: {e}")

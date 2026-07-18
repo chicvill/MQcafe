@@ -20,9 +20,9 @@ def seed_data():
     
     try:
         # Delete existing sessions/owners/nfc_cards again just to be safe
-        cur.execute("DELETE FROM stcafe.table_sessions")
-        cur.execute("DELETE FROM stcafe.nfc_cards")
-        cur.execute("DELETE FROM stcafe.owners WHERE id != 'default-owner'")
+        cur.execute("DELETE FROM table_sessions")
+        cur.execute("DELETE FROM nfc_cards")
+        cur.execute("DELETE FROM owners WHERE id != 'default-owner'")
         
         # 1. Add Owners
         owners_data = [
@@ -32,13 +32,13 @@ def seed_data():
         
         for o_id, phone, pw_hash, metadata in owners_data:
             cur.execute("""
-                INSERT INTO stcafe.owners (id, phone, password_hash, metadata)
+                INSERT INTO owners (id, phone, password_hash, metadata)
                 VALUES (%s, %s, %s, %s)
             """, (o_id, phone, pw_hash, metadata))
             
         # 2. Link Stores
-        cur.execute("UPDATE stcafe.stores SET owner_id = 'owner-min' WHERE id IN ('ST001', 'ST002')")
-        cur.execute("UPDATE stcafe.stores SET owner_id = 'owner-kim' WHERE id IN ('ST003', 'ST004', 'ST005')")
+        cur.execute("UPDATE stores SET owner_id = 'owner-min' WHERE id IN ('ST001', 'ST002')")
+        cur.execute("UPDATE stores SET owner_id = 'owner-kim' WHERE id IN ('ST003', 'ST004', 'ST005')")
         
         # 3. Add Customers (Sessions)
         customers = [
@@ -67,7 +67,7 @@ def seed_data():
                 "use_locker": False
             }
             cur.execute("""
-                INSERT INTO stcafe.table_sessions (session_id, store_id, table_id, status, checkin_time, metadata, version)
+                INSERT INTO table_sessions (session_id, store_id, table_id, status, checkin_time, metadata, version)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (session_id, store_id, "seat-1", "active", start_time, json.dumps(metadata), 1))
             

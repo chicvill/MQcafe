@@ -73,7 +73,7 @@ const getInitialStoreId = () => {
   const params = new URLSearchParams(window.location.search);
   const urlStoreId = params.get('store_id');
   if (urlStoreId) return urlStoreId;
-  const saved = localStorage.getItem('stcafe_store_id');
+  const saved = localStorage.getItem('mqcafe_store_id');
   if (saved) return saved;
   return '';
 };

@@ -10,7 +10,7 @@ def sync_store_to_cloud(store: dict):
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO stcafe.stores (id, name, ceo_name, metadata, owner_id)
+            INSERT INTO stores (id, name, ceo_name, metadata, owner_id)
             VALUES (%s, %s, %s, %s::jsonb, %s)
             ON CONFLICT (id) DO UPDATE SET
                 name = EXCLUDED.name,
@@ -35,7 +35,7 @@ def sync_session_to_cloud(session: dict):
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO stcafe.table_sessions (session_id, store_id, table_id, status, checkin_time, checkout_time, metadata, version)
+            INSERT INTO table_sessions (session_id, store_id, table_id, status, checkin_time, checkout_time, metadata, version)
             VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb, %s)
             ON CONFLICT (session_id) DO UPDATE SET
                 table_id = EXCLUDED.table_id,

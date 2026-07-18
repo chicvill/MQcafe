@@ -25,13 +25,13 @@ export default function CreateStoreContractModal({ open, onClose, storeName, ceo
 
         <Box sx={{ border: '1px solid #e2e8f0', p: 3, borderRadius: 2, bgcolor: '#f8fafc', mb: 4, height: 250, overflowY: 'auto' }}>
           <Typography variant="body2" sx={{ lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-            본 계약은 STcafe 본사(이하 "갑"이라 한다)와 {storeName}의 대표자 {ceoName}(이하 "을"이라 한다) 간에 "STcafe" 가맹점 가입 및 운영에 관한 권리와 의무를 명확히 함을 목적으로 한다.
+            본 계약은 MQcafe 본사(이하 "갑"이라 한다)와 {storeName}의 대표자 {ceoName}(이하 "을"이라 한다) 간에 "MQcafe" 가맹점 가입 및 운영에 관한 권리와 의무를 명확히 함을 목적으로 한다.
             {'\n\n'}
             제1조 (목적)
-            본 계약은 "갑"이 운영하는 "STcafe"의 영업표지 및 운영 노하우를 "을"에게 제공하고, "을"은 이를 사용하여 매장을 운영함에 있어 양 당사자 간의 권리와 의무를 규정함을 목적으로 한다.
+            본 계약은 "갑"이 운영하는 "MQcafe"의 영업표지 및 운영 노하우를 "을"에게 제공하고, "을"은 이를 사용하여 매장을 운영함에 있어 양 당사자 간의 권리와 의무를 규정함을 목적으로 한다.
             {'\n\n'}
             제2조 (가맹점 운영 권한)
-            1. "갑"은 "을"에게 "STcafe" 브랜드 상호, 상표, 서비스표, 영업 노하우, 시스템 이용 권한을 계약 기간 동안 부여한다.
+            1. "갑"은 "을"에게 "MQcafe" 브랜드 상호, 상표, 서비스표, 영업 노하우, 시스템 이용 권한을 계약 기간 동안 부여한다.
             2. "을"은 계약으로 정해진 장소({storeName})에서만 가맹점을 운영할 수 있으며, 타인에게 영업권을 임의로 양도하거나 대여할 수 없다.
             {'\n\n'}
             제3조 (가맹비 및 로열티)
@@ -52,7 +52,7 @@ export default function CreateStoreContractModal({ open, onClose, storeName, ceo
             {'\n\n'}
             제7조 (계약의 해지)
             1. "을"이 본 계약의 중요한 의무(로열티 3회 이상 미납, 브랜드 훼손, 불법 영업 등)를 위반할 경우, "갑"은 서면 통보 후 계약을 해지할 수 있다.
-            2. 계약 해지 시 "을"은 즉시 "STcafe" 브랜드 관련 상표 및 영업 표지 사용을 중단해야 한다.
+            2. 계약 해지 시 "을"은 즉시 "MQcafe" 브랜드 관련 상표 및 영업 표지 사용을 중단해야 한다.
             {'\n\n'}
             위 계약 사실을 증명하기 위해 "을"은 본 전자계약서에 직접 서명함으로써 동의를 표하며, 본 서명 완료 시 매장이 공식적으로 개설된다.
           </Typography>

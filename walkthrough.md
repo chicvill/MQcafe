@@ -7,13 +7,13 @@
 ## 📁 추가/수정된 핵심 파일 내역
 
 1.  **백엔드**:
-    *   [connection.py](file:///c:/Users/USER/Desktop/Workstation/STcafe/backend/db/connection.py): 데이터베이스 초기화 시 2개의 매장 정보 적재.
-    *   [study_cafe_db.py](file:///c:/Users/USER/Desktop/Workstation/STcafe/backend/db/study_cafe_db.py): 활성 세션 이름/전화번호 조회 지원.
-    *   [study_cafe.py](file:///c:/Users/USER/Desktop/Workstation/STcafe/backend/routers/study_cafe.py):
+    *   [connection.py](file:///c:/Users/USER/Desktop/Workstation/MQcafe/backend/db/connection.py): 데이터베이스 초기화 시 2개의 매장 정보 적재.
+    *   [study_cafe_db.py](file:///c:/Users/USER/Desktop/Workstation/MQcafe/backend/db/study_cafe_db.py): 활성 세션 이름/전화번호 조회 지원.
+    *   [study_cafe.py](file:///c:/Users/USER/Desktop/Workstation/MQcafe/backend/routers/study_cafe.py):
         *   출입문 제어 엔드포인트 `/entry`, 복구 엔드포인트 `/session/restore` 구현.
         *   실시간 고객/어드민 채팅 WebSocket 구현 및 `timestamp` 필드 자동 주입.
 2.  **프론트엔드**:
-    *   [App.tsx](file:///c:/Users/USER/Desktop/Workstation/STcafe/frontend/src/App.tsx):
+    *   [App.tsx](file:///c:/Users/USER/Desktop/Workstation/MQcafe/frontend/src/App.tsx):
         *   **실시간 메시지 도착 알림음 지원**:
             *   브라우저 자체 **Web Audio API** 기반의 톤 오실레이터 합성 기능을 내장하였습니다. 다운로드형 외부 `.mp3` 에셋 의존성 없이, 기기 자체적으로 맑고 고운 알림 이중음(D5 톤과 A5 톤이 0.08초 간격으로 연속 재생 후 지수 감쇄)을 생성해 들려줍니다.
             *   고객 모바일에서 관리자 답변을 수신했을 때와, 관리자 어드민에서 고객의 새 문의를 수신했을 때 각각 부드러운 차임벨 알림음이 재생됩니다.
@@ -25,7 +25,7 @@
         *   **좌측 이용 고객 목록 가로폭 확장**: 너비를 기존 `130px`에서 `180px`로 여유롭게 조정하였습니다.
         *   **다양한 결제 수단 추가 지원 (앱카드 & Pay 간편결제)**: PayApp 결제 대행 시뮬레이터 내에서 신용카드, 앱카드, 모바일 페이(네이버/카카오/삼성/토스페이) 선택 결제를 완벽 지원합니다.
 3.  **인쇄용 안내 포스터**:
-    *   [print_poster.html](file:///c:/Users/USER/Desktop/Workstation/STcafe/print_poster.html):
+    *   [print_poster.html](file:///c:/Users/USER/Desktop/Workstation/MQcafe/print_poster.html):
         *   **무선 카드 단말기 안내 영역 추가**: QR코드 이미지 출력 프레임 바로 아래에 실물 카드 결제용 무선 카드 단말기 안내 박스를 미려하게 삽입하였습니다.
 
 ---
@@ -62,9 +62,9 @@ Pyrefly 정적 분석 도구에서 감지된 5개의 타입 불일치 경고를 
 빌드 타임 환경변수 주입의 한계를 근본적으로 해결하기 위해, **런타임 시점에 백엔드 API로부터 안전하게 Client ID를 가져오는 방식**으로 개선하였습니다.
 
 1. **백엔드 설정 추가**: 
-   - [study_cafe.py](file:///c:/Users/USER/Desktop/Workstation/STcafe/backend/routers/study_cafe.py)에 `/api/study-cafe/config` GET 엔드포인트를 추가하여 백엔드의 런타임 환경변수(즉, `.env`나 Render 대시보드 설정값)에서 안전하게 `NICEPAY_CLIENT_ID`를 전달하도록 구현했습니다.
+   - [study_cafe.py](file:///c:/Users/USER/Desktop/Workstation/MQcafe/backend/routers/study_cafe.py)에 `/api/study-cafe/config` GET 엔드포인트를 추가하여 백엔드의 런타임 환경변수(즉, `.env`나 Render 대시보드 설정값)에서 안전하게 `NICEPAY_CLIENT_ID`를 전달하도록 구현했습니다.
 2. **프론트엔드 비동기 조회 및 적용**:
-   - [PaymentModal.tsx](file:///c:/Users/USER/Desktop/Workstation/STcafe/frontend/src/components/customer/PaymentModal.tsx)의 마운트 시점에 해당 `/config` API를 비동기 호출하여 `nicepayClientId` 상태값에 바인딩했습니다.
+   - [PaymentModal.tsx](file:///c:/Users/USER/Desktop/Workstation/MQcafe/frontend/src/components/customer/PaymentModal.tsx)의 마운트 시점에 해당 `/config` API를 비동기 호출하여 `nicepayClientId` 상태값에 바인딩했습니다.
    - 결제 요청(`AUTHNICE.requestPay`) 시, 해당 상태값을 사용하도록 코드를 변경해 런타임 환경변수가 완벽히 연동되도록 하였습니다.
 
 ---
@@ -73,11 +73,11 @@ Pyrefly 정적 분석 도구에서 감지된 5개의 타입 불일치 경고를 
 
 ### 원인 분석 (API 경로 중복 바인딩)
 * **상황**: 점주 모드에서 회원가입 및 로그인 요청을 넣었을 때 알림창에 `Not Found` 오류가 발생했습니다.
-* **원인**: `constants.ts`에 정의된 `API_URL`은 이미 백엔드 공통 API 프리픽스인 `/api/study-cafe`를 포함하고 있습니다 (`http://localhost:8080/api/study-cafe` 혹은 `https://stcafe.chicvill.store/api/study-cafe`).
-* 하지만 [OwnerMain.tsx](file:///c:/Users/USER/Desktop/Workstation/STcafe/frontend/src/components/owner/OwnerMain.tsx)에서 회원가입/로그인 엔드포인트 문자열을 정의할 때 `/api/study-cafe/owner/signup` 및 `/api/study-cafe/owner/login`으로 적어놓아, 최종 요청 경로가 `.../api/study-cafe/api/study-cafe/owner/signup` 형태로 경로가 중복되는 현상이 발생하여 서버로부터 404 에러를 반환받았습니다.
+* **원인**: `constants.ts`에 정의된 `API_URL`은 이미 백엔드 공통 API 프리픽스인 `/api/study-cafe`를 포함하고 있습니다 (`http://localhost:8080/api/study-cafe` 혹은 `http://localhost:8080/api/study-cafe`).
+* 하지만 [OwnerMain.tsx](file:///c:/Users/USER/Desktop/Workstation/MQcafe/frontend/src/components/owner/OwnerMain.tsx)에서 회원가입/로그인 엔드포인트 문자열을 정의할 때 `/api/study-cafe/owner/signup` 및 `/api/study-cafe/owner/login`으로 적어놓아, 최종 요청 경로가 `.../api/study-cafe/api/study-cafe/owner/signup` 형태로 경로가 중복되는 현상이 발생하여 서버로부터 404 에러를 반환받았습니다.
 
 ### 해결 방안
-* [OwnerMain.tsx](file:///c:/Users/USER/Desktop/Workstation/STcafe/frontend/src/components/owner/OwnerMain.tsx#L36)에서 엔드포인트 문자열의 중복된 공통 접두사(`/api/study-cafe`)를 제거하여, 정상적인 백엔드 라우터 경로인 `${API_URL}/owner/signup` 및 `${API_URL}/owner/login`으로 올바르게 전송되도록 코드를 교정했습니다.
+* [OwnerMain.tsx](file:///c:/Users/USER/Desktop/Workstation/MQcafe/frontend/src/components/owner/OwnerMain.tsx#L36)에서 엔드포인트 문자열의 중복된 공통 접두사(`/api/study-cafe`)를 제거하여, 정상적인 백엔드 라우터 경로인 `${API_URL}/owner/signup` 및 `${API_URL}/owner/login`으로 올바르게 전송되도록 코드를 교정했습니다.
 
 ---
 
@@ -85,7 +85,7 @@ Pyrefly 정적 분석 도구에서 감지된 5개의 타입 불일치 경고를 
 
 * **요청 사항**: 기존 `10080분`과 같이 단순히 분(minute) 단위로만 출력되던 잔여 시간을 직관적인 `xx시간 xx분` 형태로 변경하고자 했습니다.
 * **해결 방안**: 
-  - [ActiveSession.tsx](file:///c:/Users/USER/Desktop/Workstation/STcafe/frontend/src/components/customer/ActiveSession.tsx)에 시간 변환 유틸 함수 `formatRemaining(minutes)`을 추가했습니다.
+  - [ActiveSession.tsx](file:///c:/Users/USER/Desktop/Workstation/MQcafe/frontend/src/components/customer/ActiveSession.tsx)에 시간 변환 유틸 함수 `formatRemaining(minutes)`을 추가했습니다.
   - 이 함수는 잔여 분을 받아 `60`분 이상일 경우 시간(`Math.floor(minutes / 60)`)과 분(`minutes % 60`)을 분리하여 `168시간 0분`과 같이 포맷팅해 줍니다. 만약 60분 미만인 경우 기존처럼 분 단위(`45분`)로 부드럽게 노출되도록 사용자 경험을 다듬었습니다.
 
 ---
@@ -96,19 +96,19 @@ Pyrefly 정적 분석 도구에서 감지된 5개의 타입 불일치 경고를 
 
 ### 1. 백엔드 보안 연동
 * **API 스키마 개편**: 
-  - [schemas.py](file:///c:/Users/USER/Desktop/Workstation/STcafe/backend/schemas.py) 내 `CheckInRequest` 및 `RestoreRequest` 스키마에 `password` 필드를 필수 값으로 추가했습니다.
+  - [schemas.py](file:///c:/Users/USER/Desktop/Workstation/MQcafe/backend/schemas.py) 내 `CheckInRequest` 및 `RestoreRequest` 스키마에 `password` 필드를 필수 값으로 추가했습니다.
 * **비밀번호 단방향 암호화(해싱)**:
-  - [study_cafe.py](file:///c:/Users/USER/Desktop/Workstation/STcafe/backend/routers/study_cafe.py)의 `/checkin` 엔드포인트에서 비밀번호를 평문으로 노출하지 않고 `hashlib.sha256` 해시 값으로 즉시 변환하여 세션 메타데이터의 `password_hash` 필드에 보관하도록 하였습니다.
+  - [study_cafe.py](file:///c:/Users/USER/Desktop/Workstation/MQcafe/backend/routers/study_cafe.py)의 `/checkin` 엔드포인트에서 비밀번호를 평문으로 노출하지 않고 `hashlib.sha256` 해시 값으로 즉시 변환하여 세션 메타데이터의 `password_hash` 필드에 보관하도록 하였습니다.
 * **복구 시 암호 검증**:
   - `/session/restore`에서 유저 정보를 조회한 뒤, 전달된 비밀번호 해시와 저장된 비밀번호 해시를 비교 분석합니다. 비밀번호 불일치 시 `401 Unauthorized` 예외와 함께 `"비밀번호가 일치하지 않습니다."` 디테일 메시지를 리턴합니다. (하위 호환성을 적용하여 기존 비밀번호가 없이 저장되어 있는 테스트 레코드들은 무사 통과합니다.)
 
 ### 2. 프론트엔드 UI/UX 개편
 * **비밀번호 입력 추가**:
-  - [CustomerMain.tsx](file:///c:/Users/USER/Desktop/Workstation/STcafe/frontend/src/components/customer/CustomerMain.tsx)의 좌측 Drawer '1. 개인정보 입력' 영역 하단에 비밀번호(`type="password"`) 입력란을 신설하였습니다.
+  - [CustomerMain.tsx](file:///c:/Users/USER/Desktop/Workstation/MQcafe/frontend/src/components/customer/CustomerMain.tsx)의 좌측 Drawer '1. 개인정보 입력' 영역 하단에 비밀번호(`type="password"`) 입력란을 신설하였습니다.
 * **Context 상태 전파**:
-  - [UserContext.tsx](file:///c:/Users/USER/Desktop/Workstation/STcafe/frontend/src/contexts/UserContext.tsx)에서 `password` 및 `setPassword` 전역 상태를 선언하여 화면 전환 시에도 세션 복구에 입력란 데이터를 공유할 수 있게 했습니다.
+  - [UserContext.tsx](file:///c:/Users/USER/Desktop/Workstation/MQcafe/frontend/src/contexts/UserContext.tsx)에서 `password` 및 `setPassword` 전역 상태를 선언하여 화면 전환 시에도 세션 복구에 입력란 데이터를 공유할 수 있게 했습니다.
 * **유효성 검사 및 페이로드 바인딩**:
-  - [App.tsx](file:///c:/Users/USER/Desktop/Workstation/STcafe/frontend/src/App.tsx)의 `handleCheckIn` 및 `handleRestoreSession` 로직에 이름, 전화번호 외에 비밀번호 미입력 시 검증(Alert 경고) 단계를 추가하였고, 요청 본문에 비밀번호를 실어 보내도록 바인딩 완료했습니다.
+  - [App.tsx](file:///c:/Users/USER/Desktop/Workstation/MQcafe/frontend/src/App.tsx)의 `handleCheckIn` 및 `handleRestoreSession` 로직에 이름, 전화번호 외에 비밀번호 미입력 시 검증(Alert 경고) 단계를 추가하였고, 요청 본문에 비밀번호를 실어 보내도록 바인딩 완료했습니다.
 
 
 

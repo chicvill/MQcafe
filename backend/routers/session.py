@@ -92,7 +92,7 @@ def check_in(req: CheckInRequest, background_tasks: BackgroundTasks):
 
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{req.store_id}/update",
+        topic=f"mqcafe/{req.store_id}/update",
         payload={
             "type": "CHECKIN",
             "table_id": req.table_id,
@@ -131,7 +131,7 @@ def check_in_entry(req: EntryRequest, background_tasks: BackgroundTasks):
 
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess['store_id']}/update",
+        topic=f"mqcafe/{sess['store_id']}/update",
         payload={
             "type": "CHECKIN",
             "table_id": sess["table_id"],
@@ -152,7 +152,7 @@ def check_in_entry(req: EntryRequest, background_tasks: BackgroundTasks):
     # 출입문 제어 신호 발송
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess['store_id']}/door/control",
+        topic=f"mqcafe/{sess['store_id']}/door/control",
         payload={"command": "OPEN", "session_id": req.session_id}
     )
 
@@ -186,7 +186,7 @@ def extend_session(req: ExtendSessionRequest, background_tasks: BackgroundTasks)
     # MQTT 업데이트 발송
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess['store_id']}/update",
+        topic=f"mqcafe/{sess['store_id']}/update",
         payload={
             "type": "UPDATE",
             "table_id": sess["table_id"],
@@ -289,14 +289,14 @@ def toggle_outing(req: OutingRequest, background_tasks: BackgroundTasks):
     # 1. 외출/복귀 시 문 열림 신호 발송 (가장 먼저 실행하여 릴레이 동작 보장)
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess['store_id']}/door/control",
+        topic=f"mqcafe/{sess['store_id']}/door/control",
         payload={"command": "OPEN", "session_id": req.session_id}
     )
 
     # 2. 상태 업데이트 알림 (UI 갱신용)
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess['store_id']}/update",
+        topic=f"mqcafe/{sess['store_id']}/update",
         payload={
             "type": "OUTING_TOGGLE",
             "table_id": sess["table_id"],
@@ -348,7 +348,7 @@ def check_out(req: CheckOutRequest, background_tasks: BackgroundTasks):
 
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess['store_id']}/update",
+        topic=f"mqcafe/{sess['store_id']}/update",
         payload={
             "type": "CHECKOUT",
             "table_id": sess["table_id"],
@@ -360,7 +360,7 @@ def check_out(req: CheckOutRequest, background_tasks: BackgroundTasks):
     # 퇴실 시 문 열림 신호 발송
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess['store_id']}/door/control",
+        topic=f"mqcafe/{sess['store_id']}/door/control",
         payload={"command": "OPEN", "session_id": req.session_id}
     )
     

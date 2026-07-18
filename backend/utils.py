@@ -1,7 +1,7 @@
 """
 utils.py
 ========
-STcafe 백엔드 공통 유틸리티 함수 모음.
+MQcafe 백엔드 공통 유틸리티 함수 모음.
 라우터, 스케줄러 등 여러 곳에서 재사용합니다.
 """
 from datetime import datetime

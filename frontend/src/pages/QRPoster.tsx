@@ -21,7 +21,7 @@ export default function QRPoster() {
   const storeName = activeStore ? activeStore.name : '';
   
   // 실제 서비스 주소로 변경
-  const customerUrl = `https://stcafe.chicvill.store/customer?store=${storeId}`;
+  const customerUrl = `http://localhost:8080/customer?store=${storeId}`;
 
   useEffect(() => {
     // 인쇄용 스타일 적용 (A3 사이즈)

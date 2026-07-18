@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: stcafe_db
+      POSTGRES_DB: mqcafe_db
     ports:
       - "5432:5432"
     volumes:
@@ -27,8 +27,7 @@ services:
     environment:
       - PORT=8080
       # DB configuration pointing to the db container
-      - SUPABASE_DB_URL=postgresql://postgres:mysecretpassword@db:5432/stcafe_db
-      - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/stcafe_db
+      - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/mqcafe_db
     env_file:
       - .env
 

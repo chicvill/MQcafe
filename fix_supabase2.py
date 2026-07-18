@@ -16,7 +16,7 @@ def fix_db():
     conn = get_db_conn()
     cur = conn.cursor()
     cur.execute("""
-        UPDATE stcafe.table_sessions
+        UPDATE table_sessions
         SET store_id = %s
     """, (first_store_id,))
     print(f"Updated all sessions to store_id {first_store_id}. Rows affected: {cur.rowcount}")

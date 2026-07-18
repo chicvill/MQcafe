@@ -30,12 +30,12 @@
 더 이상 와이파이 이름이나 매장 ID를 코드에 하드코딩할 필요가 없습니다. 단 하나의 코드(`Esp32NfcDoor.ino`)로 전국의 모든 매장 기기를 커버합니다!
 
 ### ⚙️ 스마트폰 초기 세팅 방법 (WiFiManager)
-1. 최초 부팅 시, ESP32가 저장된 와이파이를 찾지 못하면 스스로 **`STCafe-Setup`** 이라는 이름의 핫스팟을 생성합니다.
-2. 스마트폰으로 `STCafe-Setup` 와이파이에 연결하면 자동으로 설정 창이 뜹니다.
+1. 최초 부팅 시, ESP32가 저장된 와이파이를 찾지 못하면 스스로 **`MQCafe-Setup`** 이라는 이름의 핫스팟을 생성합니다.
+2. 스마트폰으로 `MQCafe-Setup` 와이파이에 연결하면 자동으로 설정 창이 뜹니다.
 3. 다음 4가지 정보를 입력하고 `Save`를 누릅니다:
    - **Wi-Fi SSID**: 연결할 매장 공유기 이름
    - **Wi-Fi Password**: 공유기 비밀번호
-   - **매장 ID (`stcafe_id`)**: 본사에서 부여받은 매장 고유 ID (예: `ST001`)
+   - **매장 ID (`mqcafe_id`)**: 본사에서 부여받은 매장 고유 ID (예: `ST001`)
    - **역할 (`reader_action`)**: 
      - `entry` (입장용 NFC 단말기)
      - `exit` (퇴장용 NFC 단말기)
@@ -77,11 +77,11 @@ const char* mqtt_password = "M!nkim5053hivemq";
 // -----------------------------------------
 Preferences preferences;
 
-char stcafe_id[40] = "ST001";
+char mqcafe_id[40] = "ST001";
 char reader_action[10] = "entry";
 String macAddr = "";
 String topic_open = "";
-const char* topic_scan = "stcafe/nfc/scan";
+const char* topic_scan = "mqcafe/nfc/scan";
 
 bool shouldSaveConfig = false;
 void saveConfigCallback () {
@@ -137,7 +137,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
 void reconnect() {
   while (!client.connected()) {
-    String clientId = "STCafe-Door-" + macAddr;
+    String clientId = "MQCafe-Door-" + macAddr;
     if (client.connect(clientId.c_str(), mqtt_user, mqtt_password)) {
       client.subscribe(topic_open.c_str());
     } else {
@@ -155,40 +155,40 @@ void setup() {
   digitalWrite(DOOR_PIN, LOW);
   pinMode(RESET_BTN_PIN, INPUT_PULLUP);
 
-  preferences.begin("stcafe", false);
-  String saved_id = preferences.getString("stcafe_id", "ST001");
+  preferences.begin("mqcafe", false);
+  String saved_id = preferences.getString("mqcafe_id", "ST001");
   String saved_action = preferences.getString("reader_action", "entry");
-  saved_id.toCharArray(stcafe_id, 40);
+  saved_id.toCharArray(mqcafe_id, 40);
   saved_action.toCharArray(reader_action, 10);
 
   WiFiManager wm;
   wm.setSaveConfigCallback(saveConfigCallback);
   
-  WiFiManagerParameter custom_stcafe_id("stcafe_id", "매장 ID (예: ST001)", stcafe_id, 40);
+  WiFiManagerParameter custom_mqcafe_id("mqcafe_id", "매장 ID (예: ST001)", mqcafe_id, 40);
   WiFiManagerParameter custom_reader_action("reader_action", "역할 (entry, exit, relay)", reader_action, 10);
   
-  wm.addParameter(&custom_stcafe_id);
+  wm.addParameter(&custom_mqcafe_id);
   wm.addParameter(&custom_reader_action);
 
   // wm.resetSettings(); // 공유기 설정 초기화 시 주석 해제 후 1회 실행
   
-  if (!wm.autoConnect("STCafe-Setup")) {
+  if (!wm.autoConnect("MQCafe-Setup")) {
     delay(3000);
     ESP.restart();
   }
   
   if (shouldSaveConfig) {
-    strcpy(stcafe_id, custom_stcafe_id.getValue());
+    strcpy(mqcafe_id, custom_mqcafe_id.getValue());
     strcpy(reader_action, custom_reader_action.getValue());
     
-    preferences.putString("stcafe_id", String(stcafe_id));
+    preferences.putString("mqcafe_id", String(mqcafe_id));
     preferences.putString("reader_action", String(reader_action));
   }
   preferences.end();
 
   macAddr = WiFi.macAddress();
   macAddr.replace(":", "");
-  topic_open = "stcafe/" + String(stcafe_id) + "/door/control";
+  topic_open = "mqcafe/" + String(mqcafe_id) + "/door/control";
 
   espClient.setInsecure();
   client.setServer(mqtt_server, mqtt_port);
@@ -229,7 +229,7 @@ void loop() {
       WiFiManager wm;
       wm.resetSettings(); // 저장된 와이파이 정보 삭제
       delay(1000);
-      ESP.restart();      // 기기 재부팅 -> STCafe-Setup 핫스팟 생성
+      ESP.restart();      // 기기 재부팅 -> MQCafe-Setup 핫스팟 생성
     }
   } else {
     btnPressTime = 0;
@@ -241,7 +241,7 @@ void loop() {
   static unsigned long lastHeartbeat = 0;
   if (millis() - lastHeartbeat > 10000) {
     lastHeartbeat = millis();
-    Serial.println("[SYS] 정상 동작 중... (매장: " + String(stcafe_id) + " / 모드: " + String(reader_action) + ")");
+    Serial.println("[SYS] 정상 동작 중... (매장: " + String(mqcafe_id) + " / 모드: " + String(reader_action) + ")");
   }
 
   static unsigned long lastScanTime = 0;
@@ -263,7 +263,7 @@ void loop() {
       }
       uidStr.toUpperCase();
       
-      String payload = "{\"device_id\":\"" + macAddr + "\", \"store_id\":\"" + String(stcafe_id) + "\", \"action\":\"" + String(reader_action) + "\", \"uid\":\"" + uidStr + "\"}";
+      String payload = "{\"device_id\":\"" + macAddr + "\", \"store_id\":\"" + String(mqcafe_id) + "\", \"action\":\"" + String(reader_action) + "\", \"uid\":\"" + uidStr + "\"}";
       client.publish(topic_scan, payload.c_str());
       lastReadTime = millis();
     }

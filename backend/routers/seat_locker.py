@@ -141,7 +141,7 @@ def get_seats(background_tasks: BackgroundTasks, store_id: str = "ST001"):
                 study_cafe_db.update_session_status(sess["session_id"], "closed", datetime.now().isoformat())
                 background_tasks.add_task(
                     mqtt_publish,
-                    topic=f"stcafe/{store_id}/update",
+                    topic=f"mqcafe/{store_id}/update",
                     payload={
                         "type": "CHECKOUT",
                         "table_id": seat_id,
@@ -276,7 +276,7 @@ def move_seat(req: MoveSeatRequest, background_tasks: BackgroundTasks):
     # 이전 좌석 비우기 전파
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess['store_id']}/update",
+        topic=f"mqcafe/{sess['store_id']}/update",
         payload={
             "type": "CHECKOUT",
             "table_id": old_table_id,
@@ -289,7 +289,7 @@ def move_seat(req: MoveSeatRequest, background_tasks: BackgroundTasks):
     sess_meta = sess.get("metadata") or {}
     background_tasks.add_task(
         mqtt_publish,
-        topic=f"stcafe/{sess['store_id']}/update",
+        topic=f"mqcafe/{sess['store_id']}/update",
         payload={
             "type": "CHECKIN",
             "table_id": req.new_table_id,

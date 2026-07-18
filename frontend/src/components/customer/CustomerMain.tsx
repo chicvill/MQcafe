@@ -313,9 +313,9 @@ export default function CustomerMain({
         setOpenDrawer(false);
         if (data.session.metadata?.user_name) {
             setUserName(data.session.metadata.user_name);
-            localStorage.setItem('stcafe_user_name', data.session.metadata.user_name);
+            localStorage.setItem('mqcafe_user_name', data.session.metadata.user_name);
         }
-        localStorage.setItem('stcafe_phone_number', phoneNumber);
+        localStorage.setItem('mqcafe_phone_number', phoneNumber);
         alert('이용 정보 복구에 성공했습니다.');
       } else {
         alert('조회된 이용 정보가 없습니다. 회원가입 화면으로 이동합니다.');

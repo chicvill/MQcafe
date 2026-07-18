@@ -23,16 +23,16 @@ async def keep_alive_scheduler():
     print("[Keep-Alive] Background scheduler task started.")
     
     # Render에 매핑된 도메인 주소로 self-ping 설정
-    render_url = "https://stcafe.chicvill.store"
+    render_url = "http://localhost:8080"
     
     while True:
         try:
-            # 1. Supabase에 1 저장
+            # 1. 로컬 DB 헬스체크
             success = save_keep_alive(1)
             if success:
-                print("[Keep-Alive] Saved '1' to Supabase successfully.")
+                print("[Keep-Alive] Saved '1' to Local DB successfully.")
             else:
-                print("[Keep-Alive] Failed to save '1' to Supabase.")
+                print("[Keep-Alive] Failed to save '1' to Local DB.")
         except Exception as e:
             print(f"[Keep-Alive] Database error: {e}")
             

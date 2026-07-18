@@ -133,9 +133,9 @@ def _send_nfc_scan_event(session_id: str, data: dict, background_tasks: Optional
         "data": data
     }
     if background_tasks:
-        background_tasks.add_task(mqtt_publish, f"stcafe/{store_id}/update", payload)
+        background_tasks.add_task(mqtt_publish, f"mqcafe/{store_id}/update", payload)
     else:
-        mqtt_publish(f"stcafe/{store_id}/update", payload)
+        mqtt_publish(f"mqcafe/{store_id}/update", payload)
 
 def process_nfc_scan_logic(uid: str, store_id: str = "ST001", background_tasks: Optional[BackgroundTasks] = None, action: str = "entry"):
     """
@@ -174,7 +174,7 @@ def process_nfc_scan_logic(uid: str, store_id: str = "ST001", background_tasks: 
         result = {"status": "master_key", "message": f"점주 마스터 카드 인식 완료. ({card['user_name']})\n출입문이 개방되었습니다."}
         _send_nfc_scan_event("master", result, background_tasks, store_id)
         # MQTT로 문 열림 명령 즉시 전송
-        topic = f"stcafe/{store_id}/door/control"
+        topic = f"mqcafe/{store_id}/door/control"
         payload = {"command": "OPEN", "session_id": "master", "uid": uid}
         if background_tasks:
             background_tasks.add_task(mqtt_publish, topic, payload)
@@ -228,7 +228,7 @@ def process_nfc_scan_logic(uid: str, store_id: str = "ST001", background_tasks: 
             if background_tasks:
                 background_tasks.add_task(
                     mqtt_publish,
-                    f"stcafe/{store_id}/update", {
+                    f"mqcafe/{store_id}/update", {
                         "type": "CHECKOUT" if new_status == "closed" else "OUTING_TOGGLE",
                         "table_id": session["table_id"],
                         "session_id": session["session_id"],
@@ -236,7 +236,7 @@ def process_nfc_scan_logic(uid: str, store_id: str = "ST001", background_tasks: 
                     }
                 )
             else:
-                mqtt_publish(f"stcafe/{store_id}/update", {
+                mqtt_publish(f"mqcafe/{store_id}/update", {
                     "type": "CHECKOUT" if new_status == "closed" else "OUTING_TOGGLE",
                     "table_id": session["table_id"],
                     "session_id": session["session_id"],
@@ -256,7 +256,7 @@ def process_nfc_scan_logic(uid: str, store_id: str = "ST001", background_tasks: 
             if background_tasks:
                 background_tasks.add_task(
                     mqtt_publish,
-                    f"stcafe/{store_id}/update", {
+                    f"mqcafe/{store_id}/update", {
                         "type": "CHECKIN",
                         "table_id": session["table_id"],
                         "session_id": session["session_id"],
@@ -264,7 +264,7 @@ def process_nfc_scan_logic(uid: str, store_id: str = "ST001", background_tasks: 
                     }
                 )
             else:
-                mqtt_publish(f"stcafe/{store_id}/update", {
+                mqtt_publish(f"mqcafe/{store_id}/update", {
                     "type": "CHECKIN",
                     "table_id": session["table_id"],
                     "session_id": session["session_id"],
@@ -284,7 +284,7 @@ def process_nfc_scan_logic(uid: str, store_id: str = "ST001", background_tasks: 
             if background_tasks:
                 background_tasks.add_task(
                     mqtt_publish,
-                    f"stcafe/{store_id}/update", {
+                    f"mqcafe/{store_id}/update", {
                         "type": "OUTING_TOGGLE",
                         "table_id": session["table_id"],
                         "session_id": session["session_id"],
@@ -292,7 +292,7 @@ def process_nfc_scan_logic(uid: str, store_id: str = "ST001", background_tasks: 
                     }
                 )
             else:
-                mqtt_publish(f"stcafe/{store_id}/update", {
+                mqtt_publish(f"mqcafe/{store_id}/update", {
                     "type": "OUTING_TOGGLE",
                     "table_id": session["table_id"],
                     "session_id": session["session_id"],
@@ -305,7 +305,7 @@ def process_nfc_scan_logic(uid: str, store_id: str = "ST001", background_tasks: 
     # ---------------------------------------------
 
     # 3. 이용권이 있다면 문 열림 신호 (MQTT) 발송
-    topic = f"stcafe/{store_id}/door/control"
+    topic = f"mqcafe/{store_id}/door/control"
     payload = {"command": "OPEN", "session_id": session["session_id"], "uid": uid}
     if background_tasks:
         background_tasks.add_task(mqtt_publish, topic, payload)

@@ -187,8 +187,8 @@ function App() {
               locker_end_time: data.locker_end_time || null,
             }
           });
-          localStorage.setItem('stcafe_user_name', payAppDetails.userName);
-          localStorage.setItem('stcafe_phone_number', payAppDetails.phoneNumber);
+          localStorage.setItem('mqcafe_user_name', payAppDetails.userName);
+          localStorage.setItem('mqcafe_phone_number', payAppDetails.phoneNumber);
           setOpenDrawer(false);
           setIsExtensionMode(false);
           setOpenPayAppModal(false);

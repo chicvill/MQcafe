@@ -16,7 +16,7 @@ MQTT_PASSWORD = os.getenv("MQTT_PASSWORD") or None
 def mqtt_publish(topic: str, payload: Union[dict, str]) -> bool:
     """MQTT 토픽으로 동기식 메시지 발행 (단일 연결 및 발행)"""
     rand_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-    client_id = f'stcafe-backend-pub-{rand_str}'
+    client_id = f'mqcafe-backend-pub-{rand_str}'
     
     def on_connect(client, userdata, flags, rc, properties=None):
         if rc == 0:
@@ -66,13 +66,13 @@ def start_mqtt_listener():
     """백그라운드에서 실행되는 MQTT 수신(Subscribe) 루틴"""
     import threading
     rand_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-    client_id = f'stcafe-backend-sub-{rand_str}'
+    client_id = f'mqcafe-backend-sub-{rand_str}'
     
     def on_connect(client, userdata, flags, rc, properties=None):
         if rc == 0:
             print("[MQTT] Subscriber connected! Listening for NFC and Remote Controls...")
-            client.subscribe("stcafe/nfc/scan")
-            client.subscribe("stcafe/remote_control")
+            client.subscribe("mqcafe/nfc/scan")
+            client.subscribe("mqcafe/remote_control")
         else:
             print(f"[MQTT] Subscriber failed to connect, return code {rc}")
 
@@ -83,7 +83,7 @@ def start_mqtt_listener():
         try:
             payload = msg.payload.decode()
             print(f"📥 [MQTT Receive] topic={msg.topic} | payload={payload}")
-            if msg.topic == "stcafe/nfc/scan":
+            if msg.topic == "mqcafe/nfc/scan":
                 data = json.loads(payload)
                 uid = data.get("uid")
                 action = data.get("action", "entry")
@@ -94,14 +94,14 @@ def start_mqtt_listener():
                     result = process_nfc_scan_logic(uid, store_id, None, action)
                     print(f"   [NFC Process Result] {result}")
                     
-            elif msg.topic == "stcafe/remote_control":
+            elif msg.topic == "mqcafe/remote_control":
                 data = json.loads(payload)
                 command = data.get("command")
                 if command == "open_door":
                     # 도어 오픈 시 기존 NFC 도어 릴레이 명령 발행
                     print("   [Remote Control] Executing Open Door!")
                     target = data.get("target", "main")
-                    mqtt_publish(f"stcafe/door/{target}", {"command": "open"})
+                    mqtt_publish(f"mqcafe/door/{target}", {"command": "open"})
                 elif command == "send_chat":
                     from routers.nfc_access import _send_system_chat
                     sess_id = data.get("target_session")

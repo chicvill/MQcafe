@@ -1,7 +1,7 @@
 """
 schemas.py
 ==========
-STcafe 백엔드 전용 Pydantic 요청/응답 모델 모음.
+MQcafe 백엔드 전용 Pydantic 요청/응답 모델 모음.
 모든 라우터에서 이 파일을 공통으로 import하여 사용합니다.
 """
 from typing import Optional
@@ -123,7 +123,7 @@ class NicePayReturnRequest(BaseModel):
 
 
 class NicePayWebhookRequest(BaseModel):
-    """NicePay 서버 → STcafe 백엔드 Webhook 수신 모델"""
+    """NicePay 서버 → MQcafe 백엔드 Webhook 수신 모델"""
     resultCode: str
     resultMsg: str
     tid: str

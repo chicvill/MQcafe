@@ -10,7 +10,7 @@
 - `[x]` Frontend: Add admin side WebSocket chat widget for active seats in `App.tsx`
 - `[x]` Frontend: Add 5-minute remaining notification dialog and browser alert in `App.tsx`
 - `[x]` Verification: Validate full workflow (registration -> entrance within window -> chat -> checkout/outing)
-- `[x]` Backend: Update connection.py to insert multiple mock stores ('stcafe-store-1' and 'stcafe-store-2')
+- `[x]` Backend: Update connection.py to insert multiple mock stores ('mqcafe-store-1' and 'mqcafe-store-2')
 - `[x]` Asset: Generate a high-quality study cafe interior image and save as `frontend/public/study_cafe_interior.jpg`
 - `[x]` Asset: Generate a map mockup image and save as `frontend/public/map_mockup.jpg`
 - `[x]` Frontend: Implement Gyeonggi region / store selection dropdowns and display detail panels in `App.tsx`

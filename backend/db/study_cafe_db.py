@@ -36,7 +36,7 @@ def get_all_stores() -> List[dict]:
         return []
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM stcafe.stores ORDER BY created_at ASC")
+        cur.execute("SELECT * FROM stores ORDER BY created_at ASC")
         return [_convert_row(r) for r in cur.fetchall()]
     except Exception as e:
         print(f"[get_all_stores] ERROR: {e}")
@@ -50,7 +50,7 @@ def get_stores_by_owner(owner_id: str) -> List[dict]:
         return []
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM stcafe.stores WHERE owner_id = %s ORDER BY created_at ASC", (owner_id,))
+        cur.execute("SELECT * FROM stores WHERE owner_id = %s ORDER BY created_at ASC", (owner_id,))
         return [_convert_row(r) for r in cur.fetchall()]
     except Exception as e:
         print(f"[get_stores_by_owner] ERROR: {e}")
@@ -64,7 +64,7 @@ def get_owner_by_phone(phone: str) -> Optional[dict]:
         return None
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM stcafe.owners WHERE phone = %s", (phone,))
+        cur.execute("SELECT * FROM owners WHERE phone = %s", (phone,))
         return _row_to_dict(cur.fetchone())
     except Exception as e:
         print(f"[get_owner_by_phone] ERROR: {e}")
@@ -78,7 +78,7 @@ def get_owner_by_id(owner_id: str) -> Optional[dict]:
         return None
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM stcafe.owners WHERE id = %s", (owner_id,))
+        cur.execute("SELECT * FROM owners WHERE id = %s", (owner_id,))
         return _row_to_dict(cur.fetchone())
     except Exception as e:
         print(f"[get_owner_by_id] ERROR: {e}")
@@ -93,7 +93,7 @@ def create_owner(owner_id: str, phone: str, password_hash: str, metadata: dict =
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO stcafe.owners (id, phone, password_hash, metadata)
+            INSERT INTO owners (id, phone, password_hash, metadata)
             VALUES (%s, %s, %s, %s::jsonb)
         """, (owner_id, phone, password_hash, _dumps(metadata)))
         conn.commit()
@@ -112,7 +112,7 @@ def update_owner_metadata(owner_id: str, metadata: dict) -> bool:
     try:
         cur = conn.cursor()
         cur.execute("""
-            UPDATE stcafe.owners
+            UPDATE owners
             SET metadata = %s::jsonb
             WHERE id = %s
         """, (_dumps(metadata), owner_id))
@@ -131,7 +131,7 @@ def get_store_by_id(store_id: str) -> Optional[dict]:
         return None
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM stcafe.stores WHERE id = %s", (store_id,))
+        cur.execute("SELECT * FROM stores WHERE id = %s", (store_id,))
         return _row_to_dict(cur.fetchone())
     except Exception as e:
         print(f"[get_store_by_id] ERROR: {e}")
@@ -146,7 +146,7 @@ def get_next_store_id() -> str:
         return "ST001"
     try:
         cur = conn.cursor()
-        cur.execute("SELECT id FROM stcafe.stores WHERE id LIKE 'ST%' ORDER BY id DESC LIMIT 1")
+        cur.execute("SELECT id FROM stores WHERE id LIKE 'ST%' ORDER BY id DESC LIMIT 1")
         row = cur.fetchone()
         if row and row[0]:
             last_id = row[0] # e.g. ST001
@@ -169,7 +169,7 @@ def create_store(store_id: str, name: str, ceo_name: str, metadata: dict, owner_
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO stcafe.stores (id, name, ceo_name, metadata, owner_id)
+            INSERT INTO stores (id, name, ceo_name, metadata, owner_id)
             VALUES (%s, %s, %s, %s::jsonb, %s)
         """, (store_id, name, ceo_name, _dumps(metadata), owner_id))
         conn.commit()
@@ -188,7 +188,7 @@ def update_store_metadata(store_id: str, name: str, ceo_name: str, metadata: dic
     try:
         cur = conn.cursor()
         cur.execute("""
-            UPDATE stcafe.stores
+            UPDATE stores
             SET name = %s, ceo_name = %s, metadata = %s::jsonb
             WHERE id = %s
         """, (name, ceo_name, _dumps(metadata), store_id))
@@ -209,7 +209,7 @@ def update_owner_password(owner_id: str, old_password_hash: str, new_password_ha
     try:
         cur = conn.cursor()
         cur.execute("""
-            UPDATE stcafe.owners
+            UPDATE owners
             SET password_hash = %s
             WHERE id = %s AND password_hash = %s
         """, (new_password_hash, owner_id, old_password_hash))
@@ -231,14 +231,14 @@ def save_session(session_id: str, store_id: str, table_id: str, metadata: dict, 
         cur = conn.cursor()
         # 해당 좌석의 기존 활성 세션이 있을 경우 먼저 강제 종료 처리
         cur.execute("""
-            UPDATE stcafe.table_sessions
+            UPDATE table_sessions
             SET status = 'closed', checkout_time = %s, version = version + 1
             WHERE store_id = %s AND table_id = %s AND status != 'closed'
         """, (_now(), store_id, table_id))
         
         # 신규 세션 삽입
         cur.execute("""
-            INSERT INTO stcafe.table_sessions
+            INSERT INTO table_sessions
                 (session_id, store_id, table_id, status, checkin_time, metadata, version)
             VALUES
                 (%s, %s, %s, %s, %s, %s::jsonb, 1)
@@ -249,7 +249,7 @@ def save_session(session_id: str, store_id: str, table_id: str, metadata: dict, 
         try:
             from services.cloud_sync import sync_session_to_cloud
             # 새 세션을 다시 읽어서 동기화
-            cur.execute("SELECT * FROM stcafe.table_sessions WHERE session_id = %s", (session_id,))
+            cur.execute("SELECT * FROM table_sessions WHERE session_id = %s", (session_id,))
             new_session = _row_to_dict(cur.fetchone())
             if new_session:
                 _fire_and_forget(sync_session_to_cloud, new_session)
@@ -270,7 +270,7 @@ def get_session(session_id: str) -> Optional[dict]:
         return None
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM stcafe.table_sessions WHERE session_id = %s", (session_id,))
+        cur.execute("SELECT * FROM table_sessions WHERE session_id = %s", (session_id,))
         return _row_to_dict(cur.fetchone())
     except Exception as e:
         print(f"[get_session] ERROR: {e}")
@@ -286,7 +286,7 @@ def get_active_session_by_table(store_id: str, table_id: str) -> Optional[dict]:
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
-            SELECT * FROM stcafe.table_sessions 
+            SELECT * FROM table_sessions 
             WHERE store_id = %s AND table_id = %s AND status != 'closed'
             LIMIT 1
         """, (store_id, table_id))
@@ -310,7 +310,7 @@ def find_active_session_by_user(user_name: str, phone_number: str) -> Optional[d
         phone_hyphen = f"{phone_clean[:3]}-{phone_clean[3:7]}-{phone_clean[7:]}" if len(phone_clean) == 11 else phone_number
         
         cur.execute("""
-            SELECT * FROM stcafe.table_sessions 
+            SELECT * FROM table_sessions 
             WHERE (metadata->>'user_name') = %s 
               AND (metadata->>'phone_number') IN (%s, %s) 
               AND status != 'closed'
@@ -336,7 +336,7 @@ def find_active_session_by_phone(phone_number: str) -> Optional[dict]:
         phone_hyphen = f"{phone_clean[:3]}-{phone_clean[3:7]}-{phone_clean[7:]}" if len(phone_clean) == 11 else phone_number
         
         cur.execute("""
-            SELECT * FROM stcafe.table_sessions 
+            SELECT * FROM table_sessions 
             WHERE (metadata->>'phone_number') IN (%s, %s) 
               AND status != 'closed'
             ORDER BY checkin_time DESC
@@ -358,7 +358,7 @@ def get_all_active_sessions(store_id: str) -> List[dict]:
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
-            SELECT * FROM stcafe.table_sessions 
+            SELECT * FROM table_sessions 
             WHERE store_id = %s AND status != 'closed'
         """, (store_id,))
         return [_convert_row(r) for r in cur.fetchall()]
@@ -376,7 +376,7 @@ def get_admin_knowledge(store_id: str, bundle_type: str = 'StudyCafeStats', limi
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
-            SELECT * FROM stcafe.knowledge_bundles 
+            SELECT * FROM knowledge_bundles 
             WHERE store_id = %s AND type = %s 
             ORDER BY timestamp DESC LIMIT %s
         """, (store_id, bundle_type, limit))
@@ -393,7 +393,7 @@ def get_owner_by_phone(phone: str) -> Optional[dict]:
         return None
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM stcafe.owners WHERE phone = %s", (phone,))
+        cur.execute("SELECT * FROM owners WHERE phone = %s", (phone,))
         row = cur.fetchone()
         return dict(row) if row else None
     except Exception as e:
@@ -412,20 +412,20 @@ def update_session_status(session_id: str, status: str, checkout_time: Optional[
         if status == 'closed':
             t = checkout_time or _now()
             cur.execute("""
-                UPDATE stcafe.table_sessions
+                UPDATE table_sessions
                 SET status = %s, checkout_time = %s, version = version + 1
                 WHERE session_id = %s
             """, (status, t, session_id))
         else:
             cur.execute("""
-                UPDATE stcafe.table_sessions
+                UPDATE table_sessions
                 SET status = %s, version = version + 1
                 WHERE session_id = %s
             """, (status, session_id))
         conn.commit()
         try:
             from services.cloud_sync import sync_session_to_cloud
-            cur.execute("SELECT * FROM stcafe.table_sessions WHERE session_id = %s", (session_id,))
+            cur.execute("SELECT * FROM table_sessions WHERE session_id = %s", (session_id,))
             new_session = _row_to_dict(cur.fetchone())
             if new_session:
                 _fire_and_forget(sync_session_to_cloud, new_session)
@@ -447,14 +447,14 @@ def update_session_metadata(session_id: str, metadata: dict) -> bool:
     try:
         cur = conn.cursor()
         cur.execute("""
-            UPDATE stcafe.table_sessions
+            UPDATE table_sessions
             SET metadata = metadata || %s::jsonb, version = version + 1
             WHERE session_id = %s
         """, (_dumps(metadata), session_id))
         conn.commit()
         try:
             from services.cloud_sync import sync_session_to_cloud
-            cur.execute("SELECT * FROM stcafe.table_sessions WHERE session_id = %s", (session_id,))
+            cur.execute("SELECT * FROM table_sessions WHERE session_id = %s", (session_id,))
             new_session = _row_to_dict(cur.fetchone())
             if new_session:
                 _fire_and_forget(sync_session_to_cloud, new_session)
@@ -476,14 +476,14 @@ def change_session_table(session_id: str, new_table_id: str) -> bool:
     try:
         cur = conn.cursor()
         cur.execute("""
-            UPDATE stcafe.table_sessions
+            UPDATE table_sessions
             SET table_id = %s, version = version + 1
             WHERE session_id = %s
         """, (new_table_id, session_id))
         conn.commit()
         try:
             from services.cloud_sync import sync_session_to_cloud
-            cur.execute("SELECT * FROM stcafe.table_sessions WHERE session_id = %s", (session_id,))
+            cur.execute("SELECT * FROM table_sessions WHERE session_id = %s", (session_id,))
             new_session = _row_to_dict(cur.fetchone())
             if new_session:
                 _fire_and_forget(sync_session_to_cloud, new_session)
@@ -507,7 +507,7 @@ def get_expired_sessions(store_id: str) -> List[dict]:
         # closed 상태이거나, 종료 예정 시각(endTime)이 지난 활성 세션 조회
         # 여기서는 세션 테이블 중 상태가 closed인 데이터 혹은 만료일시가 지난 데이터 추출
         cur.execute("""
-            SELECT * FROM stcafe.table_sessions 
+            SELECT * FROM table_sessions 
             WHERE store_id = %s AND (
                 status = 'closed' OR 
                 (metadata->>'remaining_time_minutes')::int <= 0 OR
@@ -531,7 +531,7 @@ def delete_sessions(session_ids: List[str]) -> bool:
     try:
         cur = conn.cursor()
         cur.execute("""
-            DELETE FROM stcafe.table_sessions
+            DELETE FROM table_sessions
             WHERE session_id = ANY(%s)
         """, (session_ids,))
         conn.commit()
@@ -551,7 +551,7 @@ def save_knowledge_bundle(bundle_id: str, type: str, store_id: str, title: str, 
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO stcafe.knowledge_bundles
+            INSERT INTO knowledge_bundles
                 (id, type, store_id, title, items, timestamp)
             VALUES
                 (%s, %s, %s, %s, %s::jsonb, NOW())
@@ -575,7 +575,7 @@ def get_knowledge_history(store_id: str) -> List[dict]:
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
-            SELECT * FROM stcafe.knowledge_bundles 
+            SELECT * FROM knowledge_bundles 
             WHERE store_id = %s
             ORDER BY timestamp DESC
         """, (store_id,))
@@ -601,7 +601,7 @@ def save_keep_alive(val: int = 1) -> bool:
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO stcafe.keep_alive (id, val)
+            INSERT INTO mqcafe.keep_alive (id, val)
             VALUES (1, %s)
             ON CONFLICT (id)
             DO UPDATE SET val = %s, created_at = NOW()
@@ -623,7 +623,7 @@ def register_nfc_card(uid: str, user_name: str, phone_number: str) -> bool:
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO stcafe.nfc_cards (uid, user_name, phone_number)
+            INSERT INTO nfc_cards (uid, user_name, phone_number)
             VALUES (%s, %s, %s)
             ON CONFLICT (uid) DO UPDATE 
             SET user_name = EXCLUDED.user_name, phone_number = EXCLUDED.phone_number
@@ -644,7 +644,7 @@ def get_nfc_card(uid: str) -> Optional[dict]:
         return None
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM stcafe.nfc_cards WHERE uid = %s", (uid,))
+        cur.execute("SELECT * FROM nfc_cards WHERE uid = %s", (uid,))
         row = cur.fetchone()
         return dict(row) if row else None
     except Exception as e:
@@ -660,7 +660,7 @@ def get_owner_nfc_cards(owner_id: str) -> List[dict]:
         return []
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT uid, user_name, phone_number, created_at FROM stcafe.nfc_cards WHERE phone_number = %s ORDER BY created_at DESC", (owner_id,))
+        cur.execute("SELECT uid, user_name, phone_number, created_at FROM nfc_cards WHERE phone_number = %s ORDER BY created_at DESC", (owner_id,))
         return [_convert_row(r) for r in cur.fetchall()]
     except Exception as e:
         print(f"[get_owner_nfc_cards] ERROR: {e}")
@@ -675,7 +675,7 @@ def delete_owner_nfc_card(uid: str, owner_id: str) -> bool:
         return False
     try:
         cur = conn.cursor()
-        cur.execute("DELETE FROM stcafe.nfc_cards WHERE uid = %s AND phone_number = %s", (uid, owner_id))
+        cur.execute("DELETE FROM nfc_cards WHERE uid = %s AND phone_number = %s", (uid, owner_id))
         conn.commit()
         return cur.rowcount > 0
     except Exception as e:
@@ -697,7 +697,7 @@ def get_monthly_revenue(store_id: str, yyyy_mm: str) -> int:
         # 1. 활성 세션 (table_sessions)
         cur.execute("""
             SELECT SUM(COALESCE((metadata->>'amount')::integer, 0))
-            FROM stcafe.table_sessions
+            FROM table_sessions
             WHERE store_id = %s AND TO_CHAR(entry_time, 'YYYY-MM') = %s
         """, (store_id, yyyy_mm))
         res1 = cur.fetchone()
@@ -707,7 +707,7 @@ def get_monthly_revenue(store_id: str, yyyy_mm: str) -> int:
         # 2. 종료된 세션 (session_archives)
         cur.execute("""
             SELECT SUM(COALESCE((metadata->>'amount')::integer, 0))
-            FROM stcafe.session_archives
+            FROM mqcafe.session_archives
             WHERE store_id = %s AND TO_CHAR(entry_time, 'YYYY-MM') = %s
         """, (store_id, yyyy_mm))
         res2 = cur.fetchone()

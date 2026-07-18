@@ -21,14 +21,14 @@ def fix_encoding():
         "010-0000-0005": "오다섯"
     }
     
-    cur.execute("SELECT session_id, metadata FROM stcafe.table_sessions")
+    cur.execute("SELECT session_id, metadata FROM table_sessions")
     for row in cur.fetchall():
         session_id = row[0]
         meta = row[1]
         phone = meta.get("phone")
         if phone in mapping:
             meta["user_name"] = mapping[phone]
-            cur.execute("UPDATE stcafe.table_sessions SET metadata = %s WHERE session_id = %s", (json.dumps(meta, ensure_ascii=False), session_id))
+            cur.execute("UPDATE table_sessions SET metadata = %s WHERE session_id = %s", (json.dumps(meta, ensure_ascii=False), session_id))
             
     conn.commit()
     print("Fixed Korean names in DB.")

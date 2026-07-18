@@ -33,7 +33,7 @@ def validate_and_prepare_session(req):
             f"본 매장은 안전 및 정숙을 위해 고등학교 1학년(연 나이 16세) 이상만 이용 가능합니다. (현재 연 나이: {age}세)"
         )
 
-    session_id = f"SESS-STCAFE-{uuid.uuid4().hex[:12].upper()}"
+    session_id = f"SESS-MQ-{uuid.uuid4().hex[:12].upper()}"
     access_pin = f"{random.randint(1000, 9999)}"
 
     password_hash = hashlib.sha256(req.password.encode()).hexdigest()

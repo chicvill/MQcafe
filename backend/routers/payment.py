@@ -96,7 +96,7 @@ async def nicepay_approve(body: NicePayReturnRequest):
 @router.post("/payment/nicepay-webhook")
 async def nicepay_webhook(request: Request, background_tasks: BackgroundTasks):
     """
-    NicePay 서버 → STcafe 백엔드 Webhook.
+    NicePay 서버 → MQcafe 백엔드 Webhook.
 
     결제 완료/취소 이벤트 수신 후 MQTT로 단말기에 결제 완료 전파.
     NicePay는 HTTP 200 + 'OK' 텍스트를 Webhook 수신 확인으로 요구합니다.

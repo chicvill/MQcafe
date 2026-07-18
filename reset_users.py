@@ -13,14 +13,14 @@ def reset_users():
     
     try:
         # Delete customers
-        cur.execute("DELETE FROM stcafe.table_sessions")
+        cur.execute("DELETE FROM table_sessions")
         sessions_deleted = cur.rowcount
         
-        cur.execute("DELETE FROM stcafe.nfc_cards")
+        cur.execute("DELETE FROM nfc_cards")
         nfc_deleted = cur.rowcount
         
         # Delete owners except default-owner
-        cur.execute("DELETE FROM stcafe.owners WHERE id != 'default-owner'")
+        cur.execute("DELETE FROM owners WHERE id != 'default-owner'")
         owners_deleted = cur.rowcount
         
         conn.commit()

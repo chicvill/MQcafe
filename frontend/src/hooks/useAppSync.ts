@@ -34,7 +34,7 @@ export const useAppSync = (
     mqttClientRef.current = client;
 
     client.on('connect', () => {
-      client.subscribe(`stcafe/${storeId}/update`);
+      client.subscribe(`mqcafe/${storeId}/update`);
       client.subscribe(`terminal/${storeId}/heartbeat`);
       client.subscribe(`terminal/${storeId}/pay/result`);
     });
@@ -43,7 +43,7 @@ export const useAppSync = (
       try {
         const payload = JSON.parse(message.toString());
 
-        if (topic === `stcafe/${storeId}/update`) {
+        if (topic === `mqcafe/${storeId}/update`) {
           if (payload.type === 'CHECKIN' || payload.type === 'CHECKOUT' || payload.type === 'UPDATE' || payload.action === 'seat_updated' || payload.action === 'init') {
             fetchSeats();
           }

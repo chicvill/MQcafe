@@ -42,7 +42,7 @@ export default function TaxInvoiceModal({ open, onClose, storeName, ceoName, mon
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ bgcolor: '#fef2f2', fontWeight: 700, borderBottom: '1px solid #ef4444' }}>상호</TableCell>
-                    <TableCell sx={{ fontWeight: 600, borderBottom: '1px solid #ef4444' }}>STcafe 본사</TableCell>
+                    <TableCell sx={{ fontWeight: 600, borderBottom: '1px solid #ef4444' }}>MQcafe 본사</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ bgcolor: '#fef2f2', fontWeight: 700, borderBottom: 'none' }}>성명</TableCell>
